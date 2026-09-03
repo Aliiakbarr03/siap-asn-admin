@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SIAP ASN — Admin Panel</title>
+<style>
+:root{--bg:#07152c;--panel:#0b2142;--card:#10294d;--line:rgba(255,255,255,.09);--text:#f5f9ff;--muted:#9db0ca;--cyan:#20d5ff;--blue:#3478f6;--danger:#ff6378;}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,Segoe UI,Arial;background:var(--bg);color:var(--text)}button,input,select,textarea{font:inherit}button{cursor:pointer}
+.login{min-height:100vh;display:grid;place-items:center;padding:20px;background:radial-gradient(circle at 80% 10%,rgba(32,213,255,.18),transparent 30%),var(--bg)}
+.login-card{width:min(430px,100%);padding:32px;background:rgba(16,41,77,.9);border:1px solid var(--line);border-radius:28px;box-shadow:0 30px 80px #0006}
+.brand{display:flex;align-items:center;gap:12px;font-size:23px;font-weight:900}.mark{width:46px;height:46px;border-radius:15px;background:linear-gradient(135deg,var(--cyan),var(--blue));display:grid;place-items:center;font-weight:900}
+.muted{color:var(--muted);line-height:1.6}label{display:block;margin:18px 0 7px;font-size:13px;color:#c8d7e9}input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px solid var(--line);background:#071a35;color:white;outline:none}textarea{min-height:110px;resize:vertical}
+.btn{border:0;border-radius:12px;padding:12px 16px;font-weight:800}.primary{background:linear-gradient(135deg,var(--cyan),var(--blue));color:white}.ghost{background:rgba(255,255,255,.08);color:white;border:1px solid var(--line)}.danger{background:rgba(255,99,120,.15);color:#ff9aa8}
+.app{display:none;min-height:100vh}.sidebar{position:fixed;width:250px;inset:0 auto 0 0;background:#081a34;border-right:1px solid var(--line);padding:22px 14px;z-index:2}
+.side-brand{padding:5px 10px 25px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:13px 14px;border-radius:12px;margin:3px 0;font-weight:650}.navbtn:hover,.navbtn.active{background:rgba(32,213,255,.1);color:#fff}
+.main{margin-left:250px;padding:28px;max-width:1450px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:28px}.top h1{margin:0;font-size:28px}.userbox{display:flex;gap:10px;align-items:center}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.stat b{font-size:28px;display:block;margin-top:8px}
+.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}
+@media(max-width:850px){.sidebar{width:70px;padding:14px 8px}.side-brand .brand span:last-child,.navbtn span{display:none}.navbtn{text-align:center;font-size:20px}.main{margin-left:70px;padding:16px}.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
+</style>
+</head>
+<body>
+
+<section class="login" id="loginView">
+ <div class="login-card">
+  <div class="brand"><div class="mark">SA</div><div>SIAP ASN<br><small style="color:#9db0ca;font-size:12px">ADMIN PANEL</small></div></div>
+  <p class="muted">Masuk menggunakan akun administrator SIAP ASN.</p>
+  <label>Email</label><input id="email" type="email" placeholder="admin@email.com">
+  <label>Password</label><input id="password" type="password" placeholder="••••••••">
+  <div style="height:18px"></div><button class="btn primary" style="width:100%" onclick="login()">Masuk Admin →</button>
+  <div id="loginMsg" class="notice"></div>
+ </div>
+</section>
+
+<section class="app" id="appView">
+ <aside class="sidebar">
+  <div class="side-brand"><div class="brand"><div class="mark">SA</div><span>SIAP ASN</span></div></div>
+  <button class="navbtn active" onclick="showPage('dashboard',this)">🏠 <span>Dashboard</span></button>
+  <button class="navbtn" onclick="showPage('questions',this)">📝 <span>Bank Soal</span></button>
+  <button class="navbtn" onclick="showPage('materials',this)">📚 <span>Materi</span></button>
+  <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout</span></button>
+  <button class="navbtn" onclick="showPage('live',this)">🔴 <span>Live Tryout</span></button>
+  <button class="navbtn" onclick="showPage('banners',this)">🖼️ <span>Banner</span></button>
+  <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button>
+ </aside>
+ <main class="main">
+  <div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Pusat kontrol SIAP ASN</div></div><div class="userbox"><span id="adminName"></span><button class="btn ghost" onclick="logout()">Keluar</button></div></div>
+
+  <div class="page active" id="dashboard">
+   <div class="grid">
+    <div class="stat">👥 User<b id="statUsers">0</b></div><div class="stat">📝 Soal<b id="statQuestions">0</b></div>
+    <div class="stat">📚 Materi<b id="statMaterials">0</b></div><div class="stat">🏆 Tryout<b id="statTryouts">0</b></div>
+   </div>
+   <div class="panel"><h3>🔥 SIAP ASN Admin Panel</h3><p class="muted">Database sudah terhubung ke Supabase. Tambahkan konten dari menu sebelah kiri.</p></div>
+  </div>
+
+  <div class="page" id="questions">
+   <div class="panel"><div class="panel-head"><h3>➕ Tambah Soal</h3></div>
+    <div class="form-grid">
+     <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
+     <div class="full"><label>Pertanyaan</label><textarea id="qText"></textarea></div>
+     <div><label>Opsi A</label><input id="qA"></div><div><label>Opsi B</label><input id="qB"></div><div><label>Opsi C</label><input id="qC"></div><div><label>Opsi D</label><input id="qD"></div><div><label>Opsi E (opsional)</label><input id="qE"></div><div><label>Jawaban Benar</label><select id="qCorrect"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
+     <div class="full"><label>Pembahasan</label><textarea id="qExplain"></textarea></div>
+    </div><button class="btn primary" onclick="addQuestion()">Simpan Soal</button><div id="qMsg" class="notice"></div>
+   </div>
+   <div class="panel"><h3>Bank Soal Terbaru</h3><div id="questionsList"></div></div>
+  </div>
+
+  <div class="page" id="materials">
+   <div class="panel"><h3>➕ Tambah Materi</h3><div class="form-grid"><div><label>Kategori</label><select id="mCategory"></select></div><div><label>Judul</label><input id="mTitle"></div><div class="full"><label>Ringkasan</label><input id="mSummary"></div><div class="full"><label>Isi Materi</label><textarea id="mContent"></textarea></div><div><label><input type="checkbox" id="mPremium" style="width:auto"> Premium</label></div><div><label><input type="checkbox" id="mPublished" style="width:auto" checked> Publikasikan</label></div></div><button class="btn primary" onclick="addMaterial()">Simpan Materi</button></div>
+   <div class="panel"><h3>Daftar Materi</h3><div id="materialsList"></div></div>
+  </div>
+
+  <div class="page" id="tryouts">
+   <div class="panel"><h3>🏆 Buat Tryout</h3><div class="form-grid"><div><label>Judul</label><input id="tTitle"></div><div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div class="full"><label>Deskripsi</label><textarea id="tDescription"></textarea></div></div><button class="btn primary" onclick="addTryout()">Buat Tryout</button></div>
+   <div class="panel"><h3>Daftar Tryout</h3><div id="tryoutsList"></div></div>
+  </div>
+
+  <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
+  <div class="page" id="banners"><div class="panel"><h3>🖼️ Banner</h3><p class="muted">Tahap berikutnya: upload gambar ke Supabase Storage langsung dari panel ini.</p></div></div>
+  <div class="page" id="users"><div class="panel"><h3>👥 Pengguna</h3><div id="usersList"></div></div></div>
+ </main>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://qinxnrcdsmxduhvrnzfh.supabase.co";
+const SUPABASE_KEY = "sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX";
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+let categories=[];
+
+function msg(id,text,type='ok'){const e=document.getElementById(id);e.textContent=text;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
+function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
+async function login(){
+ const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
+ const {data,error}=await sb.auth.signInWithPassword({email,password});
+ if(error)return msg('loginMsg',error.message,'err');
+ await openApp();
+}
+async function logout(){await sb.auth.signOut();location.reload()}
+async function openApp(){
+ const {data:{user}}=await sb.auth.getUser();if(!user)return;
+ const {data:profile,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
+ if(error||!profile||!['admin','editor'].includes(profile.role)){await sb.auth.signOut();return msg('loginMsg','Akun ini belum memiliki akses Admin.','err')}
+ document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
+ await loadCategories();await loadPage('dashboard');
+}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
+async function loadPage(id){
+ if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
+ if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
+ if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
+ if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
+ if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
+}
+function renderTable(target,data,cols,deletable,table){
+ const el=document.getElementById(target);if(!data?.length){el.innerHTML='<div class="empty">Belum ada data.</div>';return}
+ el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
+}
+async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)alert(error.message);else loadPage(table==='questions'?'questions':table)}
+async function addQuestion(){
+ const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
+ if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
+ const {error}=await sb.from('questions').insert(payload);if(error)return msg('qMsg',error.message,'err');msg('qMsg','✅ Soal berhasil disimpan!');['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');loadPage('questions');
+}
+async function addMaterial(){const p={category_id:mCategory.value,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('materials').insert(p);if(error)return alert(error.message);mTitle.value=mSummary.value=mContent.value='';loadPage('materials')}
+async function addTryout(){const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||100};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('tryouts').insert(p);if(error)return alert(error.message);tTitle.value=tDescription.value='';loadPage('tryouts')}
+(async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
+</script>
+</body>
+</html>
