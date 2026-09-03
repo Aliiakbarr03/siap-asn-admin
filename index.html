@@ -125,7 +125,21 @@
    <div class="panel"><h3>📋 Daftar Tryout</h3><div id="tryoutsList"></div></div>
   </div>
 
-  <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
+  <div class="page" id="live">
+ <div class="panel">
+  <div class="panel-head"><div><h3>🔴 Jadwal Live Tryout</h3><div class="muted">Atur waktu mulai, selesai, dan pengumuman hasil.</div></div><span class="tag" id="liveCount">0 live</span></div>
+  <div class="form-grid">
+   <div><label>Pilih Live Tryout</label><select id="liveTryoutSelect"></select></div>
+   <div><label>Status</label><select id="liveStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div>
+   <div><label>Mulai</label><input id="liveStart" type="datetime-local"></div>
+   <div><label>Selesai</label><input id="liveEnd" type="datetime-local"></div>
+   <div><label>Hasil / Ranking Dibuka</label><input id="liveResult" type="datetime-local"></div>
+   <div><label>Durasi</label><input id="liveDuration" type="number" min="1" placeholder="Otomatis dari Tryout"></div>
+  </div>
+  <button class="btn primary" onclick="saveLiveSchedule()">💾 Simpan Jadwal Live</button><div id="liveMsg" class="notice"></div>
+ </div>
+ <div class="panel"><h3>🏆 Live Tryout & Ranking</h3><div id="liveList"></div></div>
+</div>
   <div class="page" id="banners">
  <div class="panel">
   <div class="panel-head"><div><h3 id="bFormTitle">🖼️ Tambah Banner</h3><div class="muted">Upload banner langsung ke Supabase Storage.</div></div><span class="tag" id="bannerTotal">0 banner</span></div>
@@ -179,7 +193,7 @@ async function loadPage(id){
  if(id==='questions')await loadQuestions()
  if(id==='materials')await loadMaterials()
  if(id==='tryouts'){await loadTryoutQuestionPicker();await loadTryouts()}
- if(id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
+ if(id==='live')await loadLivePanel()
  if(id==='banners')await loadBanners();
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
 }
@@ -241,6 +255,24 @@ function editMaterial(id){const r=materialCache.find(x=>x.id===id);if(!r)return;
 function resetMaterialForm(){mEditId.value='';mTitle.value=mSummary.value=mContent.value='';mPremium.value='false';mPublished.value='true';mFormTitle.textContent='📚 Tambah Materi';mSaveBtn.textContent='💾 Simpan Materi';mCancelBtn.style.display='none'}
 async function deleteMaterial(id){if(!confirm('Hapus materi ini?'))return;const {error}=await sb.from('materials').delete().eq('id',id);if(error)return alert(error.message);loadMaterials()}
 let bannerCache=[];
+async function loadLivePanel(){
+ const {data,error}=await sb.from('tryouts').select('id,title,status,duration_minutes,available_from,available_until,result_release_at,is_premium,tryout_attempts(score,correct_count,submitted_at,status)').eq('type','live').order('available_from',{ascending:false});
+ const list=data||[],sel=document.getElementById('liveTryoutSelect');liveCount.textContent=list.length+' live';
+ sel.innerHTML=list.length?list.map(x=>'<option value="'+x.id+'">'+x.title+'</option>').join(''):'<option value="">Belum ada Live Tryout</option>';
+ const el=document.getElementById('liveList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
+ if(!list.length){el.innerHTML='<div class="empty">Belum ada Tryout bertipe LIVE. Buat dulu dari menu Tryout.</div>';return}
+ el.innerHTML='<table><thead><tr><th>Live Tryout</th><th>Jadwal</th><th>Peserta</th><th>Ranking Sementara</th></tr></thead><tbody>'+list.map(r=>{const attempts=(r.tryout_attempts||[]).filter(a=>a.status==='submitted').sort((a,b)=>(b.score||0)-(a.score||0)||new Date(a.submitted_at)-new Date(b.submitted_at));const top=attempts.slice(0,3).map((a,i)=>'#'+(i+1)+' '+(a.score||0)).join(' • ')||'-';return '<tr><td>'+r.title+'</td><td>'+ (r.available_from?new Date(r.available_from).toLocaleString('id-ID'):'Belum dijadwalkan')+'</td><td>'+attempts.length+'</td><td>'+top+'</td></tr>'}).join('')+'</tbody></table>';
+}
+async function saveLiveSchedule(){
+ const id=liveTryoutSelect.value;if(!id)return msg('liveMsg','Buat Live Tryout terlebih dahulu.','err');
+ const start=liveStart.value,end=liveEnd.value,result=liveResult.value;
+ if(!start||!end)return msg('liveMsg','Waktu mulai dan selesai wajib diisi.','err');
+ if(new Date(end)<=new Date(start))return msg('liveMsg','Waktu selesai harus setelah waktu mulai.','err');
+ const p={status:liveStatus.value,available_from:new Date(start).toISOString(),available_until:new Date(end).toISOString(),result_release_at:result?new Date(result).toISOString():null};
+ if(liveDuration.value)p.duration_minutes:Number(liveDuration.value);
+ const {error}=await sb.from('tryouts').update(p).eq('id',id);if(error)return msg('liveMsg',error.message,'err');
+ msg('liveMsg','🔴 Jadwal Live Tryout berhasil disimpan!');loadLivePanel();
+}
 async function loadBanners(){
  const {data,error,count}=await sb.from('banners').select('*',{count:'exact'}).order('sort_order').order('created_at',{ascending:false});
  bannerCache=data||[];bannerTotal.textContent=(count||0)+' banner';
