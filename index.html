@@ -175,9 +175,14 @@ function msg(id,text,type='ok'){const e=document.getElementById(id);e.textConten
 function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
 async function login(){
  const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
- const {data,error}=await sb.auth.signInWithPassword({email,password});
- if(error)return msg('loginMsg',error.message,'err');
- await openApp();
+ if(!email||!password)return msg('loginMsg','Email dan password wajib diisi.','err');
+ const btn=document.querySelector('#loginView button.primary');if(btn){btn.disabled=true;btn.textContent='Memproses...'}
+ try{
+  const {data,error}=await sb.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  await openApp();
+ }catch(error){console.error(error);msg('loginMsg','Login gagal: '+(error.message||'Terjadi kesalahan.'),'err')}
+ finally{if(btn){btn.disabled=false;btn.textContent='Masuk Admin →'}}
 }
 async function logout(){await sb.auth.signOut();location.reload()}
 async function openApp(){
