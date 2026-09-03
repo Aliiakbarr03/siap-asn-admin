@@ -16,7 +16,7 @@
 .side-brand{padding:5px 10px 25px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:13px 14px;border-radius:12px;margin:3px 0;font-weight:650}.navbtn:hover,.navbtn.active{background:rgba(32,213,255,.1);color:#fff}
 .main{margin-left:250px;padding:28px;max-width:1450px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:28px}.top h1{margin:0;font-size:28px}.userbox{display:flex;gap:10px;align-items:center}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.stat b{font-size:28px;display:block;margin-top:8px}
-.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}
+.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.toolbar>div{flex:1;min-width:170px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:rgba(32,213,255,.12);color:#8eeaff;font-size:12px;font-weight:800}
 @media(max-width:850px){.sidebar{width:70px;padding:14px 8px}.side-brand .brand span:last-child,.navbtn span{display:none}.navbtn{text-align:center;font-size:20px}.main{margin-left:70px;padding:16px}.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
 </style>
 </head>
@@ -56,15 +56,26 @@
   </div>
 
   <div class="page" id="questions">
-   <div class="panel"><div class="panel-head"><h3>➕ Tambah Soal</h3></div>
+   <div class="panel">
+    <div class="panel-head"><div><h3 id="qFormTitle">➕ Tambah Soal</h3><div class="muted">Masukkan soal satu per satu ke bank soal.</div></div><span class="tag" id="questionTotal">0 soal</span></div>
     <div class="form-grid">
      <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
-     <div class="full"><label>Pertanyaan</label><textarea id="qText"></textarea></div>
+     <div class="full"><label>Pertanyaan</label><textarea id="qText" placeholder="Tulis pertanyaan di sini..."></textarea></div>
      <div><label>Opsi A</label><input id="qA"></div><div><label>Opsi B</label><input id="qB"></div><div><label>Opsi C</label><input id="qC"></div><div><label>Opsi D</label><input id="qD"></div><div><label>Opsi E (opsional)</label><input id="qE"></div><div><label>Jawaban Benar</label><select id="qCorrect"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
-     <div class="full"><label>Pembahasan</label><textarea id="qExplain"></textarea></div>
-    </div><button class="btn primary" onclick="addQuestion()">Simpan Soal</button><div id="qMsg" class="notice"></div>
+     <div class="full"><label>Pembahasan</label><textarea id="qExplain" placeholder="Penjelasan jawaban untuk peserta..."></textarea></div>
+    </div>
+    <div class="row-actions"><button class="btn primary" id="qSaveBtn" onclick="saveQuestion()">💾 Simpan Soal</button><button class="btn ghost" id="qCancelBtn" onclick="resetQuestionForm()" style="display:none">Batal Edit</button></div>
+    <input type="hidden" id="qEditId"><div id="qMsg" class="notice"></div>
    </div>
-   <div class="panel"><h3>Bank Soal Terbaru</h3><div id="questionsList"></div></div>
+   <div class="panel">
+    <div class="panel-head"><div><h3>📚 Bank Soal</h3><div class="muted">Cari, filter, edit, atau hapus soal.</div></div></div>
+    <div class="toolbar">
+      <div><label>Cari soal</label><input id="qSearch" placeholder="Ketik kata..." oninput="loadQuestions()"></div>
+      <div><label>Filter jenis</label><select id="qFilterType" onchange="loadQuestions()"><option value="">Semua jenis</option><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
+      <div><label>Filter kategori</label><select id="qFilterCategory" onchange="loadQuestions()"><option value="">Semua kategori</option></select></div>
+    </div>
+    <div id="questionsList"></div>
+   </div>
   </div>
 
   <div class="page" id="materials">
@@ -106,10 +117,10 @@ async function openApp(){
  document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
  await loadCategories();await loadPage('dashboard');
 }
-async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);if(el)el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}const filter=document.getElementById('qFilterCategory');if(filter)filter.innerHTML='<option value="">Semua kategori</option>'+categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
 async function loadPage(id){
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
- if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
+ if(id==='questions')await loadQuestions()
  if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
  if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
@@ -119,11 +130,36 @@ function renderTable(target,data,cols,deletable,table){
  el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
 }
 async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)alert(error.message);else loadPage(table==='questions'?'questions':table)}
-async function addQuestion(){
- const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
- if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
- const {error}=await sb.from('questions').insert(payload);if(error)return msg('qMsg',error.message,'err');msg('qMsg','✅ Soal berhasil disimpan!');['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');loadPage('questions');
+async function loadQuestions(){
+ let query=sb.from('questions').select('id,category_id,type,question_text,option_a,option_b,option_c,option_d,option_e,correct_answer,explanation,created_at',{count:'exact'}).order('created_at',{ascending:false});
+ const type=document.getElementById('qFilterType')?.value||'',cat=document.getElementById('qFilterCategory')?.value||'',search=(document.getElementById('qSearch')?.value||'').trim();
+ if(type)query=query.eq('type',type);if(cat)query=query.eq('category_id',cat);if(search)query=query.ilike('question_text','%'+search+'%');
+ const {data,error,count}=await query.limit(100);
+ document.getElementById('questionTotal').textContent=(count||0)+' soal';
+ const el=document.getElementById('questionsList');
+ if(error){el.innerHTML='<div class="notice err" style="display:block">'+error.message+'</div>';return}
+ if(!data?.length){el.innerHTML='<div class="empty">Belum ada soal.</div>';return}
+ const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+ el.innerHTML='<table><thead><tr><th>Jenis</th><th>Pertanyaan</th><th>Jawaban</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td><span class="tag">'+esc(r.type).toUpperCase()+'</span></td><td>'+esc(r.question_text).slice(0,140)+(r.question_text.length>140?'…':'')+'</td><td>'+esc(r.correct_answer)+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editQuestion(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteRow(\'questions\',\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
+ window.questionCache=data;
 }
+async function saveQuestion(){
+ const payload={category_id:qCategory.value||null,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
+ if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
+ const editId=qEditId.value;
+ let error;
+ if(editId){({error}=await sb.from('questions').update(payload).eq('id',editId))}
+ else {const {data:{user}}=await sb.auth.getUser();if(user)payload.created_by=user.id;({error}=await sb.from('questions').insert(payload))}
+ if(error)return msg('qMsg',error.message,'err');
+ msg('qMsg',editId?'✅ Soal berhasil diperbarui!':'✅ Soal berhasil disimpan!');
+ resetQuestionForm();loadQuestions();loadPage('dashboard');
+}
+async function editQuestion(id){
+ const r=(window.questionCache||[]).find(x=>x.id===id);if(!r)return;
+ qEditId.value=r.id;qCategory.value=r.category_id||'';qType.value=r.type;qText.value=r.question_text;qA.value=r.option_a;qB.value=r.option_b;qC.value=r.option_c;qD.value=r.option_d;qE.value=r.option_e||'';qCorrect.value=r.correct_answer||'A';qExplain.value=r.explanation||'';
+ qFormTitle.textContent='✏️ Edit Soal';qSaveBtn.textContent='💾 Simpan Perubahan';qCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'});
+}
+function resetQuestionForm(){qEditId.value='';qFormTitle.textContent='➕ Tambah Soal';qSaveBtn.textContent='💾 Simpan Soal';qCancelBtn.style.display='none';['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');qCorrect.value='A';}
 async function addMaterial(){const p={category_id:mCategory.value,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('materials').insert(p);if(error)return alert(error.message);mTitle.value=mSummary.value=mContent.value='';loadPage('materials')}
 async function addTryout(){const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||100};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('tryouts').insert(p);if(error)return alert(error.message);tTitle.value=tDescription.value='';loadPage('tryouts')}
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
