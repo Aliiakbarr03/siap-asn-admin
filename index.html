@@ -126,7 +126,26 @@
   </div>
 
   <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
-  <div class="page" id="banners"><div class="panel"><h3>🖼️ Banner</h3><p class="muted">Tahap berikutnya: upload gambar ke Supabase Storage langsung dari panel ini.</p></div></div>
+  <div class="page" id="banners">
+ <div class="panel">
+  <div class="panel-head"><div><h3 id="bFormTitle">🖼️ Tambah Banner</h3><div class="muted">Upload banner langsung ke Supabase Storage.</div></div><span class="tag" id="bannerTotal">0 banner</span></div>
+  <div class="form-grid">
+   <div><label>Judul Banner</label><input id="bTitle" placeholder="Contoh: Tryout Gratis Minggu Ini"></div>
+   <div><label>Urutan Tampil</label><input id="bSort" type="number" value="1"></div>
+   <div class="full"><label>Subtitle</label><input id="bSubtitle" placeholder="Teks tambahan (opsional)"></div>
+   <div><label>Link Tujuan</label><input id="bActionUrl" placeholder="https://... (opsional)"></div>
+   <div><label>Gambar Banner</label><input id="bImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
+   <div><label>Status</label><select id="bActive"><option value="true">🟢 Aktif</option><option value="false">⚪ Tidak Aktif</option></select></div>
+   <div><label>Mulai Tampil</label><input id="bStartsAt" type="datetime-local"></div>
+   <div><label>Selesai Tampil</label><input id="bEndsAt" type="datetime-local"></div>
+   <div class="full" id="bannerPreviewBox" style="display:none"><label>Preview</label><img id="bannerPreview" style="max-width:100%;max-height:240px;border-radius:16px;border:1px solid var(--line)"></div>
+  </div>
+  <input type="hidden" id="bEditId">
+  <div class="row-actions"><button class="btn primary" id="bSaveBtn" onclick="saveBanner()">⬆️ Upload & Simpan Banner</button><button class="btn ghost" id="bCancelBtn" onclick="resetBannerForm()" style="display:none">Batal Edit</button></div>
+  <div id="bMsg" class="notice"></div>
+ </div>
+ <div class="panel"><h3>🖼️ Daftar Banner</h3><div id="bannersList"></div></div>
+</div>
   <div class="page" id="users"><div class="panel"><h3>👥 Pengguna</h3><div id="usersList"></div></div></div>
  </main>
 </section>
@@ -161,6 +180,7 @@ async function loadPage(id){
  if(id==='materials')await loadMaterials()
  if(id==='tryouts'){await loadTryoutQuestionPicker();await loadTryouts()}
  if(id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
+ if(id==='banners')await loadBanners();
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
 }
 function renderTable(target,data,cols,deletable,table){
@@ -220,6 +240,34 @@ async function saveMaterial(){
 function editMaterial(id){const r=materialCache.find(x=>x.id===id);if(!r)return;mEditId.value=r.id;mCategory.value=r.category_id||'';mTitle.value=r.title||'';mSummary.value=r.summary||'';mContent.value=r.content||'';mPremium.value=String(!!r.is_premium);mPublished.value=String(!!r.is_published);mFormTitle.textContent='✏️ Edit Materi';mSaveBtn.textContent='💾 Simpan Perubahan';mCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'})}
 function resetMaterialForm(){mEditId.value='';mTitle.value=mSummary.value=mContent.value='';mPremium.value='false';mPublished.value='true';mFormTitle.textContent='📚 Tambah Materi';mSaveBtn.textContent='💾 Simpan Materi';mCancelBtn.style.display='none'}
 async function deleteMaterial(id){if(!confirm('Hapus materi ini?'))return;const {error}=await sb.from('materials').delete().eq('id',id);if(error)return alert(error.message);loadMaterials()}
+let bannerCache=[];
+async function loadBanners(){
+ const {data,error,count}=await sb.from('banners').select('*',{count:'exact'}).order('sort_order').order('created_at',{ascending:false});
+ bannerCache=data||[];bannerTotal.textContent=(count||0)+' banner';
+ const el=document.getElementById('bannersList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
+ if(!data?.length){el.innerHTML='<div class="empty">Belum ada banner.</div>';return}
+ el.innerHTML='<table><thead><tr><th>Banner</th><th>Status</th><th>Urutan</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td><div style="display:flex;gap:10px;align-items:center"><img src="'+r.image_url+'" style="width:90px;height:48px;object-fit:cover;border-radius:8px"><span>'+r.title+'</span></div></td><td>'+ (r.is_active?'🟢 Aktif':'⚪ Nonaktif')+'</td><td>'+r.sort_order+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editBanner(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteBanner(\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
+}
+async function saveBanner(){
+ const title=bTitle.value.trim();if(!title)return msg('bMsg','Judul banner wajib diisi.','err');
+ const editId=bEditId.value,file=bImage.files?.[0];let image_url;
+ if(editId){const old=bannerCache.find(x=>x.id===editId);image_url=old?.image_url}
+ if(file){
+  if(file.size>5*1024*1024)return msg('bMsg','Ukuran gambar maksimal 5 MB.','err');
+  const ext=file.name.split('.').pop().toLowerCase(),path='banner-'+Date.now()+'.'+ext;
+  const {error:uploadError}=await sb.storage.from('banners').upload(path,file,{cacheControl:'3600',upsert:false});
+  if(uploadError)return msg('bMsg',uploadError.message,'err');
+  image_url=sb.storage.from('banners').getPublicUrl(path).data.publicUrl;
+ }
+ if(!image_url)return msg('bMsg','Pilih gambar banner terlebih dahulu.','err');
+ const p={title,subtitle:bSubtitle.value.trim()||null,image_url,action_url:bActionUrl.value.trim()||null,sort_order:Number(bSort.value)||1,is_active:bActive.value==='true',starts_at:bStartsAt.value?new Date(bStartsAt.value).toISOString():null,ends_at:bEndsAt.value?new Date(bEndsAt.value).toISOString():null};
+ let error;if(editId)({error}=await sb.from('banners').update(p).eq('id',editId));else({error}=await sb.from('banners').insert(p)});
+ if(error)return msg('bMsg',error.message,'err');msg('bMsg','🎉 Banner berhasil disimpan!');resetBannerForm();loadBanners();
+}
+function editBanner(id){const r=bannerCache.find(x=>x.id===id);if(!r)return;bEditId.value=r.id;bTitle.value=r.title||'';bSubtitle.value=r.subtitle||'';bActionUrl.value=r.action_url||'';bSort.value=r.sort_order||1;bActive.value=String(!!r.is_active);bStartsAt.value=r.starts_at?new Date(r.starts_at).toISOString().slice(0,16):'';bEndsAt.value=r.ends_at?new Date(r.ends_at).toISOString().slice(0,16):'';bannerPreview.src=r.image_url;bannerPreviewBox.style.display='block';bFormTitle.textContent='✏️ Edit Banner';bSaveBtn.textContent='💾 Simpan Perubahan';bCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'})}
+function resetBannerForm(){bEditId.value='';bTitle.value=bSubtitle.value=bActionUrl.value='';bImage.value='';bSort.value=1;bActive.value='true';bStartsAt.value=bEndsAt.value='';bannerPreviewBox.style.display='none';bFormTitle.textContent='🖼️ Tambah Banner';bSaveBtn.textContent='⬆️ Upload & Simpan Banner';bCancelBtn.style.display='none'}
+async function deleteBanner(id){if(!confirm('Hapus banner ini?'))return;const r=bannerCache.find(x=>x.id===id);const {error}=await sb.from('banners').delete().eq('id',id);if(error)return alert(error.message);if(r?.image_url){const m=r.image_url.match(/\/banners\/(.+)$/);if(m)await sb.storage.from('banners').remove([m[1]])}loadBanners()}
+bImage?.addEventListener('change',()=>{const f=bImage.files?.[0];if(f){bannerPreview.src=URL.createObjectURL(f);bannerPreviewBox.style.display='block'}})
 let tryoutQuestionCache=[],selectedTryoutQuestions=new Set();
 async function loadTryoutQuestionPicker(){
  const search=(document.getElementById('tryoutQuestionSearch')?.value||'').trim();
