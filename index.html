@@ -1,39 +1,61 @@
-<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SIAP ASN — Admin</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SIAP ASN Admin</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,system-ui;background:#07152c;color:#fff}.wrap{width:min(1100px,92%);margin:auto}.login{min-height:100vh;display:grid;place-items:center}.box{width:min(420px,100%);background:#10284a;padding:32px;border-radius:22px;border:1px solid #29496e}.brand{font-size:28px;font-weight:900}.brand span{color:#21d4fd}input{width:100%;padding:15px;margin:8px 0 14px;border-radius:10px;border:0;font-size:16px}button{border:0;border-radius:10px;padding:14px 18px;font-weight:800;cursor:pointer}.primary{background:#21a8f6;color:#fff;width:100%}.msg{min-height:24px;margin-top:12px;color:#ff9b9b}.top{padding:18px 0;background:#0b2145}.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.logout{background:#203c5f;color:#fff}.nav{display:flex;gap:8px;flex-wrap:wrap;padding:24px 0}.nav button{background:#163657;color:#fff}.page{background:#10284a;border:1px solid #29496e;border-radius:18px;padding:25px;min-height:300px}.hidden{display:none}
-</style></head><body>
-<div id="loginView" class="login"><div class="box"><div class="brand"><span>SIAP</span> ASN</div><h2>Admin Panel</h2><p style="color:#aec0d6">Masuk untuk mengelola aplikasi.</p><input id="email" type="email" placeholder="Email admin"><input id="password" type="password" placeholder="Password"><button id="loginBtn" type="button" class="primary">Masuk Admin →</button><div id="msg" class="msg"></div></div></div>
-<div id="appView" class="hidden"><div class="top"><div class="wrap row"><div class="brand"><span>SIAP</span> ASN ADMIN</div><div><span id="adminEmail"></span> <button id="logoutBtn" class="logout">Keluar</button></div></div></div><main class="wrap"><div class="nav"><button data-page="dashboard">Dashboard</button><button data-page="bank">Bank Soal</button><button data-page="tryout">Tryout</button><button data-page="materi">Materi</button><button data-page="banner">Banner</button></div><div id="page" class="page"></div></main></div>
+body{margin:0;font-family:Arial;background:#07152c;color:white}.login{min-height:100vh;display:flex;align-items:center;justify-content:center}.box{width:360px;max-width:90%;background:#10284a;padding:30px;border-radius:20px}input,button{box-sizing:border-box;width:100%;padding:14px;margin-top:12px;border-radius:10px;border:0;font-size:16px}button{background:#2196f3;color:white;font-weight:bold;cursor:pointer}.hidden{display:none}.top{padding:20px;background:#10284a}.content{padding:40px}
+</style>
+</head>
+<body>
+<div id="loginView" class="login">
+<div class="box">
+<h1>SIAP ASN</h1>
+<h2>Admin Panel</h2>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button id="loginBtn" type="button">MASUK ADMIN</button>
+<p id="message"></p>
+</div>
+</div>
+<div id="appView" class="hidden">
+<div class="top"><b>SIAP ASN ADMIN</b> | <span id="userEmail"></span> <button id="logoutBtn" type="button" style="width:auto;margin-left:20px">Keluar</button></div>
+<div class="content"><h1>Dashboard Admin</h1><p>Login berhasil. Admin Panel aktif.</p></div>
+</div>
 <script>
-const SUPABASE_URL='https://qinxnrcdsmxduhvrnzfh.supabase.co';
-const SUPABASE_KEY='sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const $=id=>document.getElementById(id);
-function showMessage(t){$('msg').textContent=t}
-async function login(){
- const email=$('email').value.trim(),password=$('password').value;
- if(!email||!password){showMessage('Email dan password wajib diisi.');return}
- const btn=$('loginBtn');btn.disabled=true;btn.textContent='Memproses...';
- try{
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error)throw error;
-  await openApp(data.user);
- }catch(e){showMessage(e.message||'Login gagal.')}
- finally{btn.disabled=false;btn.textContent='Masuk Admin →'}
-}
-function openApp(user){
- if(!user)return;
- $('loginView').classList.add('hidden');$('appView').classList.remove('hidden');
- $('adminEmail').textContent=user.email||'Admin';showPage('dashboard');
-}
-function showPage(name){
- const text={dashboard:'<h2>Dashboard</h2><p>Selamat datang di Admin Panel SIAP ASN.</p>',bank:'<h2>Bank Soal</h2><p>Kelola soal dari panel ini.</p>',tryout:'<h2>Tryout</h2><p>Kelola tryout dari panel ini.</p>',materi:'<h2>Materi</h2><p>Kelola materi dari panel ini.</p>',banner:'<h2>Banner</h2><p>Kelola banner dari panel ini.</p>'};
- $('page').innerHTML=text[name]||text.dashboard;
-}
-$('loginBtn').addEventListener('click',login);
-$('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-$('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.reload()});
-document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
-sb.auth.getSession().then(r=>{if(r.data.session)openApp(r.data.session.user)});
-</script></body></html>
+var SUPABASE_URL = 'https://qinxnrcdsmxduhvrnzfh.supabase.co';
+var SUPABASE_KEY = 'sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX';
+var client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+document.getElementById('loginBtn').addEventListener('click', function () {
+  var email = document.getElementById('email').value;
+  var password = document.getElementById('password').value;
+  var message = document.getElementById('message');
+  message.textContent = 'Memproses login...';
+
+  client.auth.signInWithPassword({
+    email: email,
+    password: password
+  }).then(function (result) {
+    if (result.error) {
+      message.textContent = result.error.message;
+      return;
+    }
+    document.getElementById('loginView').className = 'hidden';
+    document.getElementById('appView').className = '';
+    document.getElementById('userEmail').textContent = result.data.user.email;
+  }).catch(function (error) {
+    message.textContent = error.message;
+  });
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function () {
+  client.auth.signOut().then(function () {
+    location.reload();
+  });
+});
+</script>
+</body>
+</html>
