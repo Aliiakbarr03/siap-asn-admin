@@ -79,8 +79,29 @@
   </div>
 
   <div class="page" id="materials">
-   <div class="panel"><h3>➕ Tambah Materi</h3><div class="form-grid"><div><label>Kategori</label><select id="mCategory"></select></div><div><label>Judul</label><input id="mTitle"></div><div class="full"><label>Ringkasan</label><input id="mSummary"></div><div class="full"><label>Isi Materi</label><textarea id="mContent"></textarea></div><div><label><input type="checkbox" id="mPremium" style="width:auto"> Premium</label></div><div><label><input type="checkbox" id="mPublished" style="width:auto" checked> Publikasikan</label></div></div><button class="btn primary" onclick="addMaterial()">Simpan Materi</button></div>
-   <div class="panel"><h3>Daftar Materi</h3><div id="materialsList"></div></div>
+   <div class="panel">
+    <div class="panel-head"><div><h3 id="mFormTitle">📚 Tambah Materi</h3><div class="muted">Kelola materi belajar SIAP ASN.</div></div><span class="tag" id="materialTotal">0 materi</span></div>
+    <div class="form-grid">
+      <div><label>Kategori</label><select id="mCategory"></select></div>
+      <div><label>Judul Materi</label><input id="mTitle" placeholder="Contoh: Wawasan Kebangsaan"></div>
+      <div class="full"><label>Ringkasan</label><input id="mSummary" placeholder="Ringkasan singkat materi..."></div>
+      <div class="full"><label>Isi Materi</label><textarea id="mContent" placeholder="Tulis isi materi lengkap di sini..."></textarea></div>
+      <div><label>Akses Materi</label><select id="mPremium"><option value="false">🆓 Gratis</option><option value="true">👑 Premium</option></select></div>
+      <div><label>Status</label><select id="mPublished"><option value="true">👁️ Published</option><option value="false">📝 Draft</option></select></div>
+    </div>
+    <input type="hidden" id="mEditId">
+    <div class="row-actions"><button class="btn primary" id="mSaveBtn" onclick="saveMaterial()">💾 Simpan Materi</button><button class="btn ghost" id="mCancelBtn" onclick="resetMaterialForm()" style="display:none">Batal Edit</button></div>
+    <div id="mMsg" class="notice"></div>
+   </div>
+   <div class="panel">
+    <div class="panel-head"><div><h3>📚 Daftar Materi</h3><div class="muted">Cari, filter, edit, atau hapus materi.</div></div></div>
+    <div class="toolbar">
+      <div><label>Cari Materi</label><input id="mSearch" placeholder="Cari judul..." oninput="loadMaterials()"></div>
+      <div><label>Filter Akses</label><select id="mFilterPremium" onchange="loadMaterials()"><option value="">Semua</option><option value="false">Gratis</option><option value="true">Premium</option></select></div>
+      <div><label>Filter Status</label><select id="mFilterPublished" onchange="loadMaterials()"><option value="">Semua</option><option value="true">Published</option><option value="false">Draft</option></select></div>
+    </div>
+    <div id="materialsList"></div>
+   </div>
   </div>
 
   <div class="page" id="tryouts">
@@ -137,7 +158,7 @@ async function loadCategories(){const {data}=await sb.from('categories').select(
 async function loadPage(id){
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
  if(id==='questions')await loadQuestions()
- if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
+ if(id==='materials')await loadMaterials()
  if(id==='tryouts'){await loadTryoutQuestionPicker();await loadTryouts()}
  if(id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
@@ -177,7 +198,28 @@ async function editQuestion(id){
  qFormTitle.textContent='✏️ Edit Soal';qSaveBtn.textContent='💾 Simpan Perubahan';qCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'});
 }
 function resetQuestionForm(){qEditId.value='';qFormTitle.textContent='➕ Tambah Soal';qSaveBtn.textContent='💾 Simpan Soal';qCancelBtn.style.display='none';['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');qCorrect.value='A';}
-async function addMaterial(){const p={category_id:mCategory.value,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('materials').insert(p);if(error)return alert(error.message);mTitle.value=mSummary.value=mContent.value='';loadPage('materials')}
+let materialCache=[];
+async function loadMaterials(){
+ let query=sb.from('materials').select('id,category_id,title,summary,content,is_premium,is_published,created_at',{count:'exact'}).order('created_at',{ascending:false});
+ const search=(mSearch?.value||'').trim(),premium=mFilterPremium?.value||'',published=mFilterPublished?.value||'';
+ if(search)query=query.ilike('title','%'+search+'%');if(premium!=='')query=query.eq('is_premium',premium==='true');if(published!=='')query=query.eq('is_published',published==='true');
+ const {data,error,count}=await query.limit(100);materialCache=data||[];materialTotal.textContent=(count||0)+' materi';
+ const el=document.getElementById('materialsList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
+ if(!data?.length){el.innerHTML='<div class="empty">Belum ada materi.</div>';return}
+ el.innerHTML='<table><thead><tr><th>Judul</th><th>Akses</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td>'+r.title+'</td><td><span class="tag">'+(r.is_premium?'👑 Premium':'🆓 Gratis')+'</span></td><td>'+ (r.is_published?'👁️ Published':'📝 Draft')+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editMaterial(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteMaterial(\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
+}
+async function saveMaterial(){
+ const p={category_id:mCategory.value||null,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.value==='true',is_published:mPublished.value==='true'};
+ if(!p.title)return msg('mMsg','Judul materi wajib diisi.','err');
+ const id=mEditId.value;let error;
+ if(id)({error}=await sb.from('materials').update(p).eq('id',id));else {const {data:{user}}=await sb.auth.getUser();if(user)p.created_by=user.id;({error}=await sb.from('materials').insert(p))}
+ if(error)return msg('mMsg',error.message,'err');
+ msg('mMsg',id?'✅ Materi berhasil diperbarui!':'✅ Materi berhasil disimpan!');
+ resetMaterialForm();loadMaterials();loadPage('dashboard');
+}
+function editMaterial(id){const r=materialCache.find(x=>x.id===id);if(!r)return;mEditId.value=r.id;mCategory.value=r.category_id||'';mTitle.value=r.title||'';mSummary.value=r.summary||'';mContent.value=r.content||'';mPremium.value=String(!!r.is_premium);mPublished.value=String(!!r.is_published);mFormTitle.textContent='✏️ Edit Materi';mSaveBtn.textContent='💾 Simpan Perubahan';mCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'})}
+function resetMaterialForm(){mEditId.value='';mTitle.value=mSummary.value=mContent.value='';mPremium.value='false';mPublished.value='true';mFormTitle.textContent='📚 Tambah Materi';mSaveBtn.textContent='💾 Simpan Materi';mCancelBtn.style.display='none'}
+async function deleteMaterial(id){if(!confirm('Hapus materi ini?'))return;const {error}=await sb.from('materials').delete().eq('id',id);if(error)return alert(error.message);loadMaterials()}
 let tryoutQuestionCache=[],selectedTryoutQuestions=new Set();
 async function loadTryoutQuestionPicker(){
  const search=(document.getElementById('tryoutQuestionSearch')?.value||'').trim();
