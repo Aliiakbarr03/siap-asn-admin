@@ -186,11 +186,24 @@ async function login(){
 }
 async function logout(){await sb.auth.signOut();location.reload()}
 async function openApp(){
- const {data:{user}}=await sb.auth.getUser();if(!user)return;
- const {data:profile,error}=await sb.from('profiles').select('*').eq('id',user.id).single();
- if(error||!profile||!['admin','editor'].includes(profile.role)){await sb.auth.signOut();return msg('loginMsg','Akun ini belum memiliki akses Admin.','err')}
- document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
- await loadCategories();await loadPage('dashboard');
+ try{
+  const {data:{user},error:userError}=await sb.auth.getUser();
+  if(userError) throw userError;
+  if(!user) return;
+  const {data:profiles,error:profileError}=await sb.rpc('my_admin_profile');
+  if(profileError) throw profileError;
+  const profile=profiles && profiles[0];
+  if(!profile){await sb.auth.signOut();msg('loginMsg','Akun ini belum memiliki akses Admin.','err');return}
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('appView').style.display='block';
+  document.getElementById('adminName').textContent=profile.full_name||user.email;
+  try{await loadCategories();await loadPage('dashboard')}catch(e){console.error('Dashboard load error:',e)}
+ }catch(error){
+  console.error('openApp error:',error);
+  document.getElementById('appView').style.display='none';
+  document.getElementById('loginView').style.display='grid';
+  msg('loginMsg','Gagal membuka Admin: '+(error.message||'Terjadi kesalahan.'),'err');
+ }
 }
 async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);if(el)el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}const filter=document.getElementById('qFilterCategory');if(filter)filter.innerHTML='<option value="">Semua kategori</option>'+categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
 async function loadPage(id){
@@ -343,6 +356,11 @@ async function loadTryouts(){
 }
 async function deleteTryout(id){if(!confirm('Hapus Tryout ini?'))return;const {error}=await sb.from('tryouts').delete().eq('id',id);if(error)return alert(error.message);await loadTryouts()}
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
+
+// Login dengan tombol Enter dan pulihkan sesi jika sudah login.
+document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+sb.auth.getSession().then(({data:{session}})=>{if(session)openApp()}).catch(console.error);
 </script>
 </body>
 </html>
