@@ -186,24 +186,13 @@ async function login(){
 }
 async function logout(){await sb.auth.signOut();location.reload()}
 async function openApp(){
- try{
-  const {data:{user},error:userError}=await sb.auth.getUser();
-  if(userError) throw userError;
-  if(!user) return;
-  const {data:profiles,error:profileError}=await sb.rpc('my_admin_profile');
-  if(profileError) throw profileError;
-  const profile=profiles && profiles[0];
-  if(!profile){await sb.auth.signOut();msg('loginMsg','Akun ini belum memiliki akses Admin.','err');return}
-  document.getElementById('loginView').style.display='none';
-  document.getElementById('appView').style.display='block';
-  document.getElementById('adminName').textContent=profile.full_name||user.email;
-  try{await loadCategories();await loadPage('dashboard')}catch(e){console.error('Dashboard load error:',e)}
- }catch(error){
-  console.error('openApp error:',error);
-  document.getElementById('appView').style.display='none';
-  document.getElementById('loginView').style.display='grid';
-  msg('loginMsg','Gagal membuka Admin: '+(error.message||'Terjadi kesalahan.'),'err');
- }
+ const {data:{user},error}=await sb.auth.getUser();
+ if(error){msg('loginMsg',error.message,'err');return}
+ if(!user)return;
+ document.getElementById('loginView').style.display='none';
+ document.getElementById('appView').style.display='block';
+ document.getElementById('adminName').textContent=user.email||'Administrator';
+ try{await loadCategories();await loadPage('dashboard')}catch(e){console.error(e)}
 }
 async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);if(el)el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}const filter=document.getElementById('qFilterCategory');if(filter)filter.innerHTML='<option value="">Semua kategori</option>'+categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
 async function loadPage(id){
