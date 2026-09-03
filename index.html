@@ -28,7 +28,7 @@
   <p class="muted">Masuk menggunakan akun administrator SIAP ASN.</p>
   <label>Email</label><input id="email" type="email" placeholder="admin@email.com">
   <label>Password</label><input id="password" type="password" placeholder="••••••••">
-  <div style="height:18px"></div><button class="btn primary" style="width:100%" onclick="login()">Masuk Admin →</button>
+  <div style="height:18px"></div><button id="loginBtn" type="button" class="btn primary" style="width:100%">Masuk Admin →</button>
   <div id="loginMsg" class="notice"></div>
  </div>
 </section>
@@ -164,11 +164,12 @@
  </main>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 const SUPABASE_URL = "https://qinxnrcdsmxduhvrnzfh.supabase.co";
 const SUPABASE_KEY = "sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX";
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const { createClient } = supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_KEY);
 let categories=[];
 
 function msg(id,text,type='ok'){const e=document.getElementById(id);e.textContent=text;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
@@ -365,6 +366,7 @@ async function deleteTryout(id){if(!confirm('Hapus Tryout ini?'))return;const {e
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
 
 // Login dengan tombol Enter dan pulihkan sesi jika sudah login.
+document.getElementById('loginBtn').addEventListener('click', login);
 document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
 sb.auth.getSession().then(({data:{session}})=>{if(session)openApp()}).catch(console.error);
