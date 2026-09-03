@@ -295,7 +295,7 @@ async function saveLiveSchedule(){
  if(!start||!end)return msg('liveMsg','Waktu mulai dan selesai wajib diisi.','err');
  if(new Date(end)<=new Date(start))return msg('liveMsg','Waktu selesai harus setelah waktu mulai.','err');
  const p={status:liveStatus.value,available_from:new Date(start).toISOString(),available_until:new Date(end).toISOString(),result_release_at:result?new Date(result).toISOString():null};
- if(liveDuration.value)p.duration_minutes:Number(liveDuration.value);
+ if(liveDuration.value) p.duration_minutes = Number(liveDuration.value);
  const {error}=await sb.from('tryouts').update(p).eq('id',id);if(error)return msg('liveMsg',error.message,'err');
  msg('liveMsg','🔴 Jadwal Live Tryout berhasil disimpan!');loadLivePanel();
 }
