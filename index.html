@@ -18,8 +18,15 @@
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.stat b{font-size:28px;display:block;margin-top:8px}
 .page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}
 @media(max-width:850px){.sidebar{width:70px;padding:14px 8px}.side-brand .brand span:last-child,.navbtn span{display:none}.navbtn{text-align:center;font-size:20px}.main{margin-left:70px;padding:16px}.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
+
+/* Banner upload */
+.banner-upload-box{border:2px dashed rgba(32,213,255,.35);border-radius:16px;padding:18px;background:rgba(32,213,255,.04);margin:12px 0}
+.banner-spec{font-size:13px;color:#9db0ca;line-height:1.7;margin-top:8px}
+.banner-preview{width:100%;max-height:260px;object-fit:cover;border-radius:12px;margin-top:12px;border:1px solid var(--line);display:none}
+.upload-progress{height:8px;background:#071a35;border-radius:20px;overflow:hidden;margin-top:12px;display:none}
+.upload-progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .25s}
+
 </style>
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head>
 <body>
 
@@ -57,28 +64,7 @@
   </div>
 
   <div class="page" id="questions">
-   <div class="panel">
-<div class="panel-head"><h3>📥 Import Bank Soal Massal</h3></div>
-<p class="muted">Cara cepat memasukkan 100, 200, atau sampai 1.000 soal sekaligus.</p>
-<div class="form-grid">
-  <div><label>Kategori</label><select id="importCategory"></select></div>
-  <div><label>Jenis</label><select id="importType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
-  <div class="full">
-    <label>Upload File Bank Soal</label>
-    <input id="questionImportFile" type="file" accept=".xlsx,.xls,.csv">
-    <p class="muted">Format Excel (.xlsx) atau CSV.</p>
-  </div>
-</div>
-<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px">
-  <button class="btn" type="button" onclick="downloadQuestionTemplate()">⬇ Download Template Excel</button>
-  <button id="previewImportBtn" class="btn" type="button">👁 Baca & Preview</button>
-  <button id="importQuestionsBtn" class="btn primary" type="button" disabled>Import ke Bank Soal</button>
-</div>
-<div id="importStatus" class="notice"></div>
-<div id="importPreview" style="margin-top:15px;overflow:auto"></div>
-</div>
-
-<div class="panel"><div class="panel-head"><h3>➕ Tambah Soal Manual</h3></div>
+   <div class="panel"><div class="panel-head"><h3>➕ Tambah Soal</h3></div>
     <div class="form-grid">
      <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
      <div class="full"><label>Pertanyaan</label><textarea id="qText"></textarea></div>
@@ -100,7 +86,35 @@
   </div>
 
   <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
-  <div class="page" id="banners"><div class="panel"><h3>🖼️ Banner</h3><p class="muted">Tahap berikutnya: upload gambar ke Supabase Storage langsung dari panel ini.</p></div></div>
+  <div class="page" id="banners">
+  <div class="panel">
+    <div class="panel-head"><h3>🖼️ Kelola Banner</h3></div>
+    <p class="muted">Upload dan kelola banner yang akan tampil otomatis di Web Peserta.</p>
+    <div class="form-grid">
+      <div><label>Judul Banner</label><input id="bannerTitle" placeholder="Contoh: Persiapan CPNS 2026"></div>
+      <div><label>Urutan Tampil</label><input id="bannerSort" type="number" min="1" value="1"></div>
+      <div class="full"><label>Subjudul (opsional)</label><input id="bannerSubtitle" placeholder="Contoh: Belajar lebih siap bersama SIAP ASN"></div>
+      <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="https://..."></div>
+      <div class="full banner-upload-box">
+        <label>Upload Gambar Banner</label>
+        <div class="banner-spec"><b>Ukuran disarankan: 1920 × 600 px</b><br>Rasio: 16:5 • Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
+        <input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewBannerFile(this)">
+        <img id="bannerPreview" class="banner-preview" alt="Preview banner">
+        <div id="bannerUploadProgress" class="upload-progress"><div id="bannerUploadBar"></div></div>
+      </div>
+      <div><label><input type="checkbox" id="bannerActive" style="width:auto" checked> Banner aktif</label></div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+      <button id="saveBannerBtn" class="btn primary" type="button" onclick="saveBanner()">Upload & Simpan Banner</button>
+      <button class="btn" type="button" onclick="clearBannerForm()">Reset</button>
+    </div>
+    <div id="bannerMsg" class="notice"></div>
+  </div>
+  <div class="panel">
+    <div class="panel-head"><h3>Banner Saat Ini</h3></div>
+    <div id="bannersList"></div>
+  </div>
+</div>
   <div class="page" id="users"><div class="panel"><h3>👥 Pengguna</h3><div id="usersList"></div></div></div>
  </main>
 </section>
@@ -113,7 +127,8 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let categories=[];
 
 function msg(id,text,type='ok'){const e=document.getElementById(id);e.textContent=text;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
-function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
+function showPage(id,btn){if(id==='banners'){try{await loadBanners()}catch(e){console.error(e)}}
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
 async function login(){
  const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
  const {data,error}=await sb.auth.signInWithPassword({email,password});
@@ -128,7 +143,7 @@ async function openApp(){
  document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
  await loadCategories();await loadPage('dashboard');
 }
-async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory','importCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
 async function loadPage(id){
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
  if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
@@ -141,134 +156,6 @@ function renderTable(target,data,cols,deletable,table){
  el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
 }
 async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)alert(error.message);else loadPage(table==='questions'?'questions':table)}
-
-let importedQuestions = [];
-
-function escapeImportHtml(value){
- return String(value||'').replace(/[&<>"']/g,function(ch){
-  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
- });
-}
-
-function downloadQuestionTemplate(){
- const rows=[
-  ['question_text','option_a','option_b','option_c','option_d','option_e','correct_answer','explanation'],
-  ['Pancasila terdiri dari berapa sila?','3','4','5','6','','C','Pancasila terdiri dari 5 sila.'],
-  ['2 + 2 = ?','3','4','5','6','','B','Jawaban yang benar adalah 4.']
- ];
- const ws=XLSX.utils.aoa_to_sheet(rows);
- const wb=XLSX.utils.book_new();
- XLSX.utils.book_append_sheet(wb,ws,'Bank Soal');
- XLSX.writeFile(wb,'template-bank-soal-siap-asn.xlsx');
-}
-
-async function readQuestionImport(){
- const input=document.getElementById('questionImportFile');
- const file=input.files && input.files[0];
- if(!file){msg('importStatus','Pilih file Excel atau CSV terlebih dahulu.','err');return;}
- const status=document.getElementById('importStatus');
- status.style.display='block';
- status.className='notice';
- status.textContent='Membaca file...';
- try{
-  const buffer=await file.arrayBuffer();
-  const wb=XLSX.read(buffer,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]];
-  const rows=XLSX.utils.sheet_to_json(ws,{defval:''});
-  importedQuestions=rows.map(function(r){
-   const norm={};
-   Object.keys(r).forEach(function(k){
-    norm[String(k).trim().toLowerCase().replace(/\s+/g,'_')]=String(r[k]??'').trim();
-   });
-   return {
-    question_text:norm.question_text||norm.question||norm.soal||'',
-    option_a:norm.option_a||norm.a||'',
-    option_b:norm.option_b||norm.b||'',
-    option_c:norm.option_c||norm.c||'',
-    option_d:norm.option_d||norm.d||'',
-    option_e:norm.option_e||norm.e||'',
-    correct_answer:(norm.correct_answer||norm.jawaban||norm.answer||'').toUpperCase(),
-    explanation:norm.explanation||norm.pembahasan||''
-   };
-  }).filter(function(q){return q.question_text;});
-
-  const valid=importedQuestions.filter(function(q){
-   return q.question_text&&q.option_a&&q.option_b&&q.option_c&&q.option_d&&['A','B','C','D','E'].includes(q.correct_answer);
-  });
-
-  status.className='notice '+(valid.length===importedQuestions.length?'ok':'err');
-  status.innerHTML='<b>'+importedQuestions.length+' soal ditemukan</b><br>✓ Valid: '+valid.length+' soal<br>⚠ Perlu diperiksa: '+(importedQuestions.length-valid.length)+' soal';
-
-  const preview=importedQuestions.slice(0,10).map(function(q,i){
-   const ok=q.question_text&&q.option_a&&q.option_b&&q.option_c&&q.option_d&&['A','B','C','D','E'].includes(q.correct_answer);
-   return '<tr><td>'+String(i+1)+'</td><td>'+escapeImportHtml(q.question_text.substring(0,100))+'</td><td>'+escapeImportHtml(q.correct_answer)+'</td><td>'+(ok?'✓ Valid':'⚠ Tidak lengkap')+'</td></tr>';
-  }).join('');
-
-  document.getElementById('importPreview').innerHTML=
-   '<table style="width:100%;border-collapse:collapse"><thead><tr><th>No</th><th>Soal</th><th>Jawaban</th><th>Status</th></tr></thead><tbody>'+preview+'</tbody></table>'+
-   (importedQuestions.length>10?'<p class="muted">Menampilkan preview 10 soal pertama.</p>':'');
-  document.getElementById('importQuestionsBtn').disabled=valid.length===0;
- }catch(error){
-  importedQuestions=[];
-  document.getElementById('importQuestionsBtn').disabled=true;
-  msg('importStatus','File gagal dibaca: '+error.message,'err');
- }
-}
-
-async function importQuestions(){
- const categoryId=document.getElementById('importCategory').value;
- const type=document.getElementById('importType').value;
- const valid=importedQuestions.filter(function(q){
-  return q.question_text&&q.option_a&&q.option_b&&q.option_c&&q.option_d&&['A','B','C','D','E'].includes(q.correct_answer);
- });
- if(!valid.length){msg('importStatus','Tidak ada soal valid untuk diimport.','err');return;}
- if(!categoryId){msg('importStatus','Pilih kategori terlebih dahulu.','err');return;}
-
- const btn=document.getElementById('importQuestionsBtn');
- btn.disabled=true;
- try{
-  let done=0;
-  for(let i=0;i<valid.length;i+=100){
-   const chunk=valid.slice(i,i+100).map(function(q){
-    return {
-     category_id:categoryId,
-     type:type,
-     question_text:q.question_text,
-     option_a:q.option_a,
-     option_b:q.option_b,
-     option_c:q.option_c,
-     option_d:q.option_d,
-     option_e:q.option_e||null,
-     correct_answer:q.correct_answer,
-     explanation:q.explanation||null
-    };
-   });
-   btn.textContent='Mengimport '+done+' / '+valid.length+' soal...';
-   const result=await sb.from('questions').insert(chunk);
-   if(result.error)throw result.error;
-   done+=chunk.length;
-  }
-  msg('importStatus','✓ Berhasil. '+done+' soal sudah masuk ke Bank Soal dan tersimpan di Supabase.','ok');
-  btn.textContent='Import ke Bank Soal';
-  document.getElementById('questionImportFile').value='';
-  document.getElementById('importPreview').innerHTML='';
-  importedQuestions=[];
-  btn.disabled=true;
-  await loadPage('questions');
- }catch(error){
-  btn.disabled=false;
-  btn.textContent='Import ke Bank Soal';
-  msg('importStatus','Import gagal: '+error.message,'err');
- }
-}
-
-document.addEventListener('DOMContentLoaded',function(){
- const previewBtn=document.getElementById('previewImportBtn');
- const importBtn=document.getElementById('importQuestionsBtn');
- if(previewBtn)previewBtn.addEventListener('click',readQuestionImport);
- if(importBtn)importBtn.addEventListener('click',importQuestions);
-});
-
 async function addQuestion(){
  const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
  if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
@@ -276,6 +163,153 @@ async function addQuestion(){
 }
 async function addMaterial(){const p={category_id:mCategory.value,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('materials').insert(p);if(error)return alert(error.message);mTitle.value=mSummary.value=mContent.value='';loadPage('materials')}
 async function addTryout(){const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||100};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('tryouts').insert(p);if(error)return alert(error.message);tTitle.value=tDescription.value='';loadPage('tryouts')}
+
+function previewBannerFile(input){
+  const file=input.files && input.files[0];
+  const preview=document.getElementById('bannerPreview');
+  if(!file){preview.style.display='none';return;}
+  const allowed=['image/jpeg','image/png','image/webp'];
+  if(!allowed.includes(file.type)){msg('bannerMsg','Format gambar harus JPG, PNG, atau WEBP.','err');input.value='';return;}
+  if(file.size>3*1024*1024){msg('bannerMsg','Ukuran gambar maksimal 3 MB.','err');input.value='';return;}
+  const url=URL.createObjectURL(file);
+  preview.src=url;preview.style.display='block';
+  const img=new Image();
+  img.onload=function(){
+    if(img.width!==1920 || img.height!==600){
+      msg('bannerMsg','Gambar terbaca '+img.width+' × '+img.height+' px. Disarankan 1920 × 600 px agar tampilan Web Peserta optimal.','err');
+    }else{
+      msg('bannerMsg','✓ Ukuran banner sudah sesuai: 1920 × 600 px.','ok');
+    }
+  };
+  img.src=url;
+}
+
+function clearBannerForm(){
+  document.getElementById('bannerTitle').value='';
+  document.getElementById('bannerSubtitle').value='';
+  document.getElementById('bannerLink').value='';
+  document.getElementById('bannerSort').value='1';
+  document.getElementById('bannerFile').value='';
+  document.getElementById('bannerActive').checked=true;
+  document.getElementById('bannerPreview').style.display='none';
+  document.getElementById('bannerMsg').style.display='none';
+}
+
+async function saveBanner(){
+  const file=document.getElementById('bannerFile').files[0];
+  const title=document.getElementById('bannerTitle').value.trim()||'Banner SIAP ASN';
+  const subtitle=document.getElementById('bannerSubtitle').value.trim()||null;
+  const link=document.getElementById('bannerLink').value.trim()||null;
+  const sortOrder=Number(document.getElementById('bannerSort').value)||1;
+  const isActive=document.getElementById('bannerActive').checked;
+  const btn=document.getElementById('saveBannerBtn');
+  const wrap=document.getElementById('bannerUploadProgress');
+  const bar=document.getElementById('bannerUploadBar');
+
+  if(!file){msg('bannerMsg','Pilih gambar banner terlebih dahulu.','err');return;}
+
+  btn.disabled=true;
+  btn.textContent='Mengupload banner...';
+  wrap.style.display='block';bar.style.width='15%';
+
+  try{
+    const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+    const path='banners/banner_'+Date.now()+'.'+ext;
+
+    const upload=await sb.storage.from('banners').upload(path,file,{
+      cacheControl:'3600',
+      upsert:false,
+      contentType:file.type
+    });
+    if(upload.error)throw upload.error;
+
+    bar.style.width='65%';
+    const publicUrl=sb.storage.from('banners').getPublicUrl(path).data.publicUrl;
+    if(!publicUrl)throw new Error('Gagal mendapatkan URL gambar.');
+
+    bar.style.width='85%';
+    const result=await sb.from('banners').insert({
+      title:title,
+      subtitle:subtitle,
+      image_url:publicUrl,
+      link_url:link,
+      sort_order:sortOrder,
+      is_active:isActive
+    });
+    if(result.error)throw result.error;
+
+    bar.style.width='100%';
+    msg('bannerMsg','✓ Banner berhasil diupload. Web Peserta otomatis membaca banner aktif dari Supabase.','ok');
+    await loadBanners();
+
+    setTimeout(function(){
+      clearBannerForm();
+      wrap.style.display='none';
+      bar.style.width='0%';
+    },900);
+  }catch(error){
+    msg('bannerMsg','Upload gagal: '+(error.message||'Terjadi kesalahan.'),'err');
+  }finally{
+    btn.disabled=false;
+    btn.textContent='Upload & Simpan Banner';
+  }
+}
+
+async function loadBanners(){
+  const el=document.getElementById('bannersList');
+  if(!el)return;
+  el.innerHTML='<div class="muted">Memuat banner...</div>';
+  try{
+    const result=await sb.from('banners').select('*').order('sort_order',{ascending:true});
+    if(result.error)throw result.error;
+    const data=result.data||[];
+    if(!data.length){
+      el.innerHTML='<div class="empty">Belum ada banner.</div>';
+      return;
+    }
+    el.innerHTML='';
+    data.forEach(function(b){
+      const card=document.createElement('div');
+      card.className='data-card';
+      card.style.marginBottom='12px';
+
+      const img=document.createElement('img');
+      img.src=b.image_url||'';
+      img.style.cssText='width:220px;max-width:100%;height:80px;object-fit:cover;border-radius:10px;display:block;margin-bottom:10px';
+
+      const titleEl=document.createElement('b');
+      titleEl.textContent=b.title||'Banner';
+
+      const meta=document.createElement('div');
+      meta.className='muted';
+      meta.textContent='Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
+
+      const del=document.createElement('button');
+      del.type='button';
+      del.className='btn danger';
+      del.style.marginTop='10px';
+      del.textContent='Hapus';
+      del.addEventListener('click',function(){deleteBanner(b.id);});
+
+      card.appendChild(img);
+      card.appendChild(titleEl);
+      card.appendChild(meta);
+      card.appendChild(del);
+      el.appendChild(card);
+    });
+  }catch(error){
+    el.innerHTML='<div class="empty">'+String(error.message||error)+'</div>';
+  }
+}
+
+async function deleteBanner(id){
+  if(!confirm('Hapus banner ini?'))return;
+  const result=await sb.from('banners').delete().eq('id',id);
+  if(result.error){alert(result.error.message);return;}
+  await loadBanners();
+}
+
+
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
 </script>
 </body>
