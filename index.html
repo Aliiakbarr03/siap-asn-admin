@@ -203,6 +203,15 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
 .bulk-help{font-size:12px;line-height:1.65;color:#7b8492}.bulk-preview{max-height:330px;overflow:auto;border:1px solid #eceef3;border-radius:14px;margin-top:14px;background:#fff}.bulk-preview table{min-width:980px}.bulk-summary{display:flex;gap:9px;flex-wrap:wrap;margin-top:12px}.bulk-pill{display:inline-flex;align-items:center;padding:7px 10px;border-radius:999px;background:#f2f3f7;font-size:12px;font-weight:800}.bulk-pill.ok{background:#eaf8f2;color:#13795b}.bulk-pill.bad{background:#fff0ee;color:#ba3c2d}.bulk-map{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:12px}.subcat-input{background:#fff!important}.import-progress{height:8px;background:#eef0f4;border-radius:99px;overflow:hidden;margin-top:12px;display:none}.import-progress>div{height:100%;width:0;background:linear-gradient(90deg,#6255df,#8a7df3);transition:width .2s}
 @media(max-width:850px){.bulk-map{grid-template-columns:1fr}.bulk-preview{margin-left:-4px;margin-right:-4px}}
 
+
+/* === CATEGORY ICON PICKER === */
+.cat-icon-preview{margin-top:10px;min-height:54px;display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e9ebf0;border-radius:14px;background:#fbfbfd;color:#7a8390;font-size:12px}
+.cat-icon-preview svg{width:30px;height:30px;stroke-width:1.9;color:#5f52d7}
+.cat-icon-preview.has-icon{color:#303641;font-weight:700}
+.icon-picker-help{font-size:11px;color:#8a93a0;margin-top:6px}
+.icon-preview-cell{width:36px;height:36px;border-radius:11px;background:#f1efff;color:#5b4ed0;display:inline-grid;place-items:center}
+.icon-preview-cell svg{width:19px;height:19px;stroke-width:2}
+.category-option-icon{display:inline-flex}
 </style>
 
 </head>
@@ -248,7 +257,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="form-grid">
      <div><label>Nama Kategori</label><input id="catName" oninput="if(!catSlug.dataset.touched)catSlug.value=slugify(catName.value)"></div>
      <div><label>Slug</label><input id="catSlug" oninput="catSlug.dataset.touched='1'"></div>
-     <div><label>Icon (emoji, opsional)</label><input id="catIcon" placeholder="📘"></div>
+     <div><label>Icon Kategori</label><select id="catIcon" aria-label="Pilih icon kategori"><option value="">Pilih icon...</option><optgroup label="Belajar & Pendidikan"><option value="book-open">Buku terbuka</option><option value="book">Buku</option><option value="library">Perpustakaan</option><option value="graduation-cap">Pendidikan</option><option value="school">Sekolah</option><option value="notebook-pen">Catatan belajar</option><option value="file-text">Dokumen</option><option value="file-check-2">Dokumen selesai</option><option value="file-question">Soal / pertanyaan</option><option value="clipboard-list">Daftar soal</option><option value="clipboard-check">Checklist</option><option value="list-checks">Daftar latihan</option><option value="pencil">Pensil</option><option value="pen-line">Menulis</option><option value="bookmark">Bookmark</option><option value="layers">Materi bertingkat</option><option value="folder-open">Folder materi</option><option value="archive">Arsip</option></optgroup><optgroup label="TWK & Kebangsaan"><option value="flag">Bendera / nasional</option><option value="landmark">Pemerintahan</option><option value="shield-check">Bela negara / perlindungan</option><option value="scale">Hukum / keadilan</option><option value="gavel">Hukum / aturan</option><option value="badge-check">Integritas / validasi</option><option value="handshake">Kerja sama</option><option value="heart-handshake">Pengabdian / sosial</option><option value="globe-2">Wawasan dunia</option><option value="map">Geografi</option><option value="map-pin">Lokasi</option><option value="building-2">Instansi</option><option value="users">Masyarakat</option><option value="megaphone">Kebijakan / pengumuman</option></optgroup><optgroup label="TIU & Logika"><option value="brain">Penalaran</option><option value="calculator">Kalkulator</option><option value="sigma">Matematika</option><option value="binary">Numerik / data</option><option value="puzzle">Analogi / puzzle</option><option value="lightbulb">Ide / penalaran</option><option value="target">Target / strategi</option><option value="scan-search">Analisis</option><option value="search">Pencarian</option><option value="chart-line">Analisis grafik</option><option value="bar-chart-3">Statistik</option><option value="activity">Logika / aktivitas</option></optgroup><optgroup label="TKP & Kompetensi"><option value="briefcase">Profesional</option><option value="user-check">Kompetensi</option><option value="heart">Empati</option><option value="message-circle">Komunikasi</option><option value="messages-square">Diskusi</option><option value="handshake">Kerja sama</option><option value="users-round">Tim / masyarakat</option><option value="badge">Kompetensi</option><option value="building">Organisasi</option><option value="network">Jejaring</option></optgroup><optgroup label="Tryout & Performa"><option value="trophy">Tryout / juara</option><option value="medal">Prestasi</option><option value="timer">Waktu</option><option value="clock-3">Waktu</option><option value="calendar">Jadwal</option><option value="calendar-check">Jadwal selesai</option><option value="gauge">Progress / meter</option><option value="flame">Streak / semangat</option><option value="rocket">Mulai</option><option value="zap">Cepat</option><option value="line-chart">Grafik performa</option><option value="pie-chart">Statistik</option></optgroup><optgroup label="Akun & Umum"><option value="user-round">Peserta</option><option value="settings">Pengaturan</option><option value="lock-keyhole">Keamanan</option><option value="crown">Premium</option><option value="star">Favorit</option><option value="bell">Notifikasi</option><option value="info">Informasi</option><option value="circle-help">Bantuan</option><option value="circle-check">Berhasil</option><option value="sparkles">Unggulan</option><option value="tag">Tag</option><option value="tags">Kategori / tag</option><option value="filter">Filter</option><option value="grid-2x2">Grid</option><option value="list">List</option><option value="upload">Upload</option><option value="download">Download</option><option value="monitor">Web</option><option value="smartphone">HP</option><option value="laptop">Laptop</option></optgroup></select><div class="icon-picker-help">90+ icon Lucide • icon akan tampil otomatis di Web Publish.</div><div id="catIconPreview" class="cat-icon-preview"><span>Pilih icon untuk melihat preview</span></div></div>
      <div><label>Urutan Tampil</label><input id="catSort" type="number" min="0" value="0"></div>
      <div class="full"><label>Deskripsi (opsional)</label><input id="catDescription"></div>
      <div><label><input type="checkbox" id="catActive" style="width:auto" checked> Aktif</label></div>
@@ -354,6 +363,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
 <script>
 const SUPABASE_URL = "https://qinxnrcdsmxduhvrnzfh.supabase.co";
 const SUPABASE_KEY = "sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX";
@@ -390,6 +400,55 @@ async function openApp(){
  document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
  await loadCategories();await loadPage('dashboard');
 }
+
+/* === CATEGORY ICON SYSTEM === */
+const ICON_LABELS={'book-open': 'Buku terbuka', 'book': 'Buku', 'library': 'Perpustakaan', 'graduation-cap': 'Pendidikan', 'school': 'Sekolah', 'notebook-pen': 'Catatan belajar', 'file-text': 'Dokumen', 'file-check-2': 'Dokumen selesai', 'file-question': 'Soal / pertanyaan', 'clipboard-list': 'Daftar soal', 'clipboard-check': 'Checklist', 'list-checks': 'Daftar latihan', 'pencil': 'Pensil', 'pen-line': 'Menulis', 'bookmark': 'Bookmark', 'layers': 'Materi bertingkat', 'folder-open': 'Folder materi', 'archive': 'Arsip', 'flag': 'Bendera / nasional', 'landmark': 'Pemerintahan', 'shield-check': 'Bela negara / perlindungan', 'scale': 'Hukum / keadilan', 'gavel': 'Hukum / aturan', 'badge-check': 'Integritas / validasi', 'handshake': 'Kerja sama', 'heart-handshake': 'Pengabdian / sosial', 'globe-2': 'Wawasan dunia', 'map': 'Geografi', 'map-pin': 'Lokasi', 'building-2': 'Instansi', 'users': 'Masyarakat', 'megaphone': 'Kebijakan / pengumuman', 'brain': 'Penalaran', 'calculator': 'Kalkulator', 'sigma': 'Matematika', 'binary': 'Numerik / data', 'puzzle': 'Analogi / puzzle', 'lightbulb': 'Ide / penalaran', 'target': 'Target / strategi', 'scan-search': 'Analisis', 'search': 'Pencarian', 'chart-line': 'Analisis grafik', 'bar-chart-3': 'Statistik', 'activity': 'Logika / aktivitas', 'briefcase': 'Profesional', 'user-check': 'Kompetensi', 'heart': 'Empati', 'message-circle': 'Komunikasi', 'messages-square': 'Diskusi', 'users-round': 'Tim / masyarakat', 'badge': 'Kompetensi', 'building': 'Organisasi', 'network': 'Jejaring', 'trophy': 'Tryout / juara', 'medal': 'Prestasi', 'timer': 'Waktu', 'clock-3': 'Waktu', 'calendar': 'Jadwal', 'calendar-check': 'Jadwal selesai', 'gauge': 'Progress / meter', 'flame': 'Streak / semangat', 'rocket': 'Mulai', 'zap': 'Cepat', 'line-chart': 'Grafik performa', 'pie-chart': 'Statistik', 'user-round': 'Peserta', 'settings': 'Pengaturan', 'lock-keyhole': 'Keamanan', 'crown': 'Premium', 'star': 'Favorit', 'bell': 'Notifikasi', 'info': 'Informasi', 'circle-help': 'Bantuan', 'circle-check': 'Berhasil', 'sparkles': 'Unggulan', 'tag': 'Tag', 'tags': 'Kategori / tag', 'filter': 'Filter', 'grid-2x2': 'Grid', 'list': 'List', 'upload': 'Upload', 'download': 'Download', 'monitor': 'Web', 'smartphone': 'HP', 'laptop': 'Laptop'};
+const ICON_KEYS=new Set(['book-open', 'book', 'library', 'graduation-cap', 'school', 'notebook-pen', 'file-text', 'file-check-2', 'file-question', 'clipboard-list', 'clipboard-check', 'list-checks', 'pencil', 'pen-line', 'bookmark', 'layers', 'folder-open', 'archive', 'flag', 'landmark', 'shield-check', 'scale', 'gavel', 'badge-check', 'handshake', 'heart-handshake', 'globe-2', 'map', 'map-pin', 'building-2', 'users', 'megaphone', 'brain', 'calculator', 'sigma', 'binary', 'puzzle', 'lightbulb', 'target', 'scan-search', 'search', 'chart-line', 'bar-chart-3', 'activity', 'briefcase', 'user-check', 'heart', 'message-circle', 'messages-square', 'handshake', 'users-round', 'badge', 'building', 'network', 'trophy', 'medal', 'timer', 'clock-3', 'calendar', 'calendar-check', 'gauge', 'flame', 'rocket', 'zap', 'line-chart', 'pie-chart', 'user-round', 'settings', 'lock-keyhole', 'crown', 'star', 'bell', 'info', 'circle-help', 'circle-check', 'sparkles', 'tag', 'tags', 'filter', 'grid-2x2', 'list', 'upload', 'download', 'monitor', 'smartphone', 'laptop']);
+function safeAttr(v){return String(v??'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}
+function renderAdminIcon(name,fallback='book-open'){
+ const v=String(name||'').trim();
+ if(ICON_KEYS.has(v))return `<i data-lucide="${safeAttr(v)}"></i>`;
+ return safeAdmin(v||fallback);
+}
+function refreshLucideIcons(){
+ if(window.lucide?.createIcons){
+   try{window.lucide.createIcons({attrs:{'stroke-width':1.9}})}catch(e){console.warn('Icon render',e)}
+ }
+}
+function updateCategoryIconPreview(){
+ const sel=document.getElementById('catIcon'),box=document.getElementById('catIconPreview');if(!sel||!box)return;
+ const key=sel.value;
+ if(!key){box.classList.remove('has-icon');box.innerHTML='<span>Pilih icon untuk melihat preview</span>';return}
+ box.classList.add('has-icon');
+ box.innerHTML=`${renderAdminIcon(key)}<span>${safeAdmin(ICON_LABELS[key]||key)}</span>`;
+ refreshLucideIcons();
+}
+function suggestCategoryIcon(){
+ const name=String(document.getElementById('catName')?.value||'').toLowerCase();
+ const sel=document.getElementById('catIcon');if(!sel||sel.dataset.manual==='1')return;
+ let key='book-open';
+ const rules=[
+  [/(nasional|kebangsaan|pancasila|wawasan|negara|bela negara|integritas)/,'flag'],
+  [/(twk|sejarah|hukum|uud|konstitusi|demokrasi|politik)/,'landmark'],
+  [/(deret|angka|numerik|matematika|hitung|aritmetika)/,'calculator'],
+  [/(analogi|antonim|sinonim|verbal|logika|silogisme|penalaran)/,'brain'],
+  [/(tkp|pelayanan|profesional|komunikasi|sosial|jejaring|kerja sama)/,'users-round'],
+  [/(tryout|ujian|tes|latihan)/,'clipboard-check'],
+  [/(materi|belajar|modul|pelajaran)/,'book-open'],
+  [/(formasi|cpns|asn|instansi|jabatan)/,'landmark'],
+  [/(ranking|peringkat|prestasi)/,'trophy']
+ ];
+ for(const [re,ik] of rules){if(re.test(name)){key=ik;break}}
+ if(ICON_KEYS.has(key))sel.value=key;
+ updateCategoryIconPreview();
+}
+function setupCategoryIconPicker(){
+ const sel=document.getElementById('catIcon'),name=document.getElementById('catName');if(!sel)return;
+ sel.addEventListener('change',()=>{sel.dataset.manual=sel.value?'1':'0';updateCategoryIconPreview()});
+ if(name)name.addEventListener('input',suggestCategoryIcon);
+ updateCategoryIconPreview();
+}
+
 function slugify(s){return String(s||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')}
 async function addCategory(){
  const p={name:catName.value.trim(),slug:(catSlug.value.trim()||slugify(catName.value)),description:catDescription.value.trim()||null,icon:catIcon.value.trim()||null,sort_order:Number(catSort.value)||0,is_active:catActive.checked};
@@ -397,11 +456,11 @@ async function addCategory(){
  const {error}=await sb.from('categories').insert(p);
  if(error)return msg('catMsg',error.message,'err');
  msg('catMsg','✅ Kategori berhasil disimpan!');
- catName.value=catSlug.value=catDescription.value=catIcon.value='';catSort.value='0';catActive.checked=true;catSlug.dataset.touched='';
+ catName.value=catSlug.value=catDescription.value='';catIcon.value='';catIcon.dataset.manual='0';catSort.value='0';catActive.checked=true;catSlug.dataset.touched='';updateCategoryIconPreview();
  await loadCategories();
  loadPage('categories');
 }
-async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory','bulkQuestionDefaultCategory','bulkMaterialDefaultCategory']){const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Pilih kategori...</option>'+categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}renderSubcategoryHints()}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory','bulkQuestionDefaultCategory','bulkMaterialDefaultCategory']){const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Pilih kategori...</option>'+categories.map(c=>`<option value="${c.id}">${ICON_KEYS.has(String(c.icon||''))?'◈ ':((c.icon||'')+' ')}${c.name}</option>`).join('')}renderSubcategoryHints()}
 async function loadPage(id){
  if(id==='categories'){const {data}=await sb.from('categories').select('id,name,slug,icon,sort_order,is_active').order('sort_order');renderTable('categoriesList',data,['name','slug','icon','sort_order','is_active'],true,'categories')}
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
@@ -418,7 +477,7 @@ function renderUserTable(target,data){
 
 function renderTable(target,data,cols,deletable,table){
  const el=document.getElementById(target);if(!data?.length){el.innerHTML='<div class="empty">Belum ada data.</div>';return}
- el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
+ el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>`<td>${c==='icon'?`<span class="icon-preview-cell">${renderAdminIcon(r[c])}</span>`:String(r[c]??'')}</td>`).join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>'; refreshLucideIcons();
 }
 async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)return alert(error.message);if(table==='categories')await loadCategories();loadPage(table==='questions'?'questions':table)}
 async function addQuestion(){
@@ -722,6 +781,8 @@ async function loadFormationsAdmin(){const a=document.getElementById('formations
 async function deleteFormation(id){if(!confirm('Hapus formasi ini?'))return;const {error}=await sb.from('formations').delete().eq('id',id);if(error)return alert(error.message);await loadFormationsAdmin()}
 
 const _loadPageForFormation=window.loadPage;window.loadPage=async function(id){if(typeof _loadPageForFormation==='function')await _loadPageForFormation(id);if(id==='formations')await loadFormationsAdmin()};
+setupCategoryIconPicker();
+refreshLucideIcons();
 </script>
 </body>
 </html>
