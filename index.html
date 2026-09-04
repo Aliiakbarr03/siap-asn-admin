@@ -213,7 +213,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
   <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout</span></button>
   <button class="navbtn" onclick="showPage('live',this)">🔴 <span>Live Tryout</span></button>
   <button class="navbtn" onclick="showPage('banners',this)">🖼️ <span>Banner</span></button>
-  <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button>
+  <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button><button class="navbtn" onclick="showPage('premium',this)">👑 <span>Premium</span></button><button class="navbtn" onclick="showPage('notifications',this)">🔔 <span>Notifikasi</span></button>
  </aside>
  <main class="main">
   <div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Pusat kontrol SIAP ASN</div></div><div class="userbox"><span id="adminName"></span><button class="btn ghost" onclick="logout()">Keluar</button></div></div>
@@ -258,7 +258,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
   </div>
 
   <div class="page" id="tryouts">
-   <div class="panel"><h3>🏆 Buat Tryout</h3><div class="form-grid"><div><label>Judul</label><input id="tTitle"></div><div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div class="full"><label>Deskripsi</label><textarea id="tDescription"></textarea></div></div><button class="btn primary" onclick="addTryout()">Buat Tryout</button></div>
+   <div class="panel"><h3>🏆 Buat Tryout</h3><div class="form-grid"><div><label>Judul</label><input id="tTitle"></div><div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div><label>Mulai Live (opsional)</label><input id="tStartsAt" type="datetime-local"></div><div><label>Selesai Live (opsional)</label><input id="tEndsAt" type="datetime-local"></div><div class="full"><label>Deskripsi</label><textarea id="tDescription"></textarea></div></div><button class="btn primary" onclick="addTryout()">Buat Tryout</button></div>
    <div class="panel"><h3>Daftar Tryout</h3><div id="tryoutsList"></div></div>
   </div>
 
@@ -292,7 +292,9 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
     <div id="bannersList"></div>
   </div>
 </div>
-  <div class="page" id="users"><div class="panel"><div class="panel-head"><div><h3>👥 Pengguna</h3><p class="muted">Profil dan biodata peserta yang tersimpan.</p></div></div><div id="usersList"></div></div></div>
+  <div class="page" id="premium"><div class="panel"><div class="panel-head"><div><h3>👑 Premium</h3><p class="muted">Kelola paket premium dan verifikasi pengajuan pembayaran.</p></div></div><div class="form-grid"><div><label>Nama Paket</label><input id="planName" placeholder="Premium 30 Hari"></div><div><label>Slug</label><input id="planSlug" placeholder="premium-30"></div><div><label>Harga</label><input id="planPrice" type="number" min="0" value="0"></div><div><label>Durasi (hari)</label><input id="planDays" type="number" min="1" value="30"></div><div class="full"><label>Deskripsi</label><input id="planDescription" placeholder="Akses materi dan tryout premium"></div></div><button class="btn primary" onclick="addPlan()">Tambah Paket</button><div id="planMsg" class="notice"></div></div><div class="panel"><h3>Daftar Paket</h3><div id="plansList"></div></div><div class="panel"><h3>Pengajuan Pembayaran</h3><div id="paymentsList"></div></div></div>
+<div class="page" id="notifications"><div class="panel"><div class="panel-head"><div><h3>🔔 Kirim Notifikasi</h3><p class="muted">Kirim pengumuman ke seluruh peserta.</p></div></div><div><label>Judul</label><input id="noticeTitle"></div><div><label>Pesan</label><textarea id="noticeMessage"></textarea></div><button class="btn primary" onclick="broadcastNotification()">Kirim ke Semua Peserta</button><div id="noticeMsg" class="notice"></div></div></div>
+<div class="page" id="users"><div class="panel"><div class="panel-head"><div><h3>👥 Pengguna</h3><p class="muted">Profil dan biodata peserta yang tersimpan.</p></div></div><div id="usersList"></div></div></div>
  </main>
 </section>
 
@@ -519,6 +521,36 @@ async function deleteBanner(id){
 
 
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
+/* === ADMIN FEATURE LAYER === */
+function safeAdmin(x){return String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+async function addPlan(){try{const name=document.getElementById('planName').value.trim(),slug=document.getElementById('planSlug').value.trim()||slugify(name);if(!name||!slug)return msg('planMsg','Nama dan slug wajib diisi.','err');const p={name,slug,description:document.getElementById('planDescription').value.trim()||null,price:Number(document.getElementById('planPrice').value)||0,duration_days:Number(document.getElementById('planDays').value)||30,is_active:true,sort_order:0};const {error}=await sb.from('subscription_plans').insert(p);if(error)throw error;msg('planMsg','Paket berhasil ditambahkan.','ok');await loadAdminPremium()}catch(e){msg('planMsg',e.message,'err')}}
+async function loadAdminPremium(){const pe=document.getElementById('plansList'),pay=document.getElementById('paymentsList');if(!pe||!pay)return;const [plans,payments]=await Promise.all([sb.from('subscription_plans').select('id,name,slug,price,duration_days,is_active,sort_order').order('sort_order'),sb.from('payments').select('id,user_id,order_id,amount,status,plan_id,created_at,profiles(full_name)').order('created_at',{ascending:false}).limit(100)]);pe.innerHTML=plans.error?'<div class="empty">'+safeAdmin(plans.error.message)+'</div>':((plans.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px"><b>${safeAdmin(p.name)}</b><div class="muted">${safeAdmin(p.slug)} · Rp ${Number(p.price||0).toLocaleString('id-ID')} · ${p.duration_days} hari</div></div>`).join('')||'<div class="empty">Belum ada paket.</div>');pay.innerHTML=payments.error?'<div class="empty">'+safeAdmin(payments.error.message)+'</div>':((payments.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px"><b>${safeAdmin(p.profiles?.full_name||p.user_id)}</b><div class="muted">${safeAdmin(p.order_id)} · Rp ${Number(p.amount||0).toLocaleString('id-ID')} · ${safeAdmin(p.status)}</div>${p.status==='pending'?`<button class="btn primary" style="margin-top:10px" onclick="activatePremium('${p.user_id}','${p.id}')">Aktifkan Premium</button>`:''}</div>`).join('')||'<div class="empty">Belum ada pengajuan.</div>')}
+async function activatePremium(userId,paymentId){if(!confirm('Aktifkan premium untuk peserta ini?'))return;try{const {error}=await sb.rpc('admin_activate_premium',{p_user_id:userId,p_payment_id:paymentId});if(error)throw error;alert('Premium berhasil diaktifkan.');await loadAdminPremium();await loadPage('users')}catch(e){alert(e.message||'Gagal mengaktifkan premium.')}}
+async function broadcastNotification(){try{const title=document.getElementById('noticeTitle').value.trim(),message=document.getElementById('noticeMessage').value.trim();if(!title||!message)return msg('noticeMsg','Judul dan pesan wajib diisi.','err');const {data,error}=await sb.rpc('admin_notify_all',{p_title:title,p_message:message,p_type:'announcement'});if(error)throw error;msg('noticeMsg',(data||0)+' peserta menerima notifikasi.','ok');document.getElementById('noticeTitle').value='';document.getElementById('noticeMessage').value=''}catch(e){msg('noticeMsg',e.message,'err')}}
+const _loadPageOriginal=loadPage;window.loadPage=async function(id){await _loadPageOriginal(id);if(id==='premium')await loadAdminPremium()}
+const _showPageOriginal=showPage;window.showPage=async function(id,btn){if(id==='premium')await loadAdminPremium();return _showPageOriginal(id,btn)}
+
+const _addTryoutOriginal=addTryout;
+window.addTryout=async function(){
+  const type=document.getElementById('tType').value;
+  const title=document.getElementById('tTitle').value.trim();
+  if(!title)return alert('Judul wajib diisi');
+  const p={title,description:document.getElementById('tDescription').value.trim()||null,type,status:document.getElementById('tStatus').value,duration_minutes:Number(document.getElementById('tDuration').value)||100};
+  if(!['practice','regular','live'].includes(type))return alert('Tipe tryout tidak valid.');
+  const {data:created,error}=await sb.from('tryouts').insert(p).select('id').single();
+  if(error) return alert(error.message);
+  if(type==='live'){
+    const s=document.getElementById('tStartsAt').value,e=document.getElementById('tEndsAt').value;
+    if(!s||!e) return alert('Untuk Live Tryout, isi waktu mulai dan selesai.');
+    const starts=new Date(s),ends=new Date(e);
+    if(Number.isNaN(starts.getTime())||Number.isNaN(ends.getTime())||ends<=starts)return alert('Jadwal Live tidak valid.');
+    const {error:le}=await sb.from('live_sessions').insert({tryout_id:created.id,starts_at:starts.toISOString(),ends_at:ends.toISOString(),ranking_visible:true});
+    if(le){await sb.from('tryouts').delete().eq('id',created.id);return alert(le.message);}
+  }
+  document.getElementById('tTitle').value='';document.getElementById('tDescription').value='';document.getElementById('tStartsAt').value='';document.getElementById('tEndsAt').value='';
+  await loadPage('tryouts');
+};
+window.addTryout=window.addTryout;
 </script>
 </body>
 </html>
