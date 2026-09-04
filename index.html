@@ -26,6 +26,41 @@
 .upload-progress{height:8px;background:#071a35;border-radius:20px;overflow:hidden;margin-top:12px;display:none}
 .upload-progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--cyan),var(--blue));transition:width .25s}
 
+
+/* === SIAP ASN VISUAL REDESIGN: UI ONLY === */
+
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+:root{--bg:#f7f8fc;--panel:#ffffff;--card:#ffffff;--text:#202124;--muted:#6b7280;--line:#e6e9ef;--cyan:#6750a4;--blue:#6750a4;--danger:#d93025}
+*{font-family:'DM Sans',system-ui,sans-serif}
+body{background:linear-gradient(135deg,#fafbff 0%,#f7f8fc 55%,#fff9f5 100%)!important;color:var(--text)!important}
+.login-screen,.login-wrap{background:transparent!important}
+.login-card,.auth-card{background:rgba(255,255,255,.96)!important;border:1px solid #e8eaed!important;border-radius:28px!important;box-shadow:0 20px 70px rgba(60,64,67,.13)!important}
+.sidebar{background:#fff!important;border-right:1px solid #e8eaed!important;box-shadow:none!important}
+.logo,.brand{font-family:'Plus Jakarta Sans',sans-serif!important;color:#202124!important;font-weight:800!important}
+.logo b,.brand b{color:#6750a4!important}
+.nav-item,.menu-item{color:#5f6368!important;border-radius:14px!important;margin:4px 8px!important}
+.nav-item:hover,.menu-item:hover{background:#f3f0fa!important;color:#4f378b!important}
+.nav-item.active,.menu-item.active{background:#ede8f7!important;color:#4f378b!important;font-weight:700!important}
+.main,.content{background:transparent!important}
+.topbar{background:rgba(255,255,255,.82)!important;border-bottom:1px solid #e8eaed!important;backdrop-filter:blur(16px)!important}
+.panel,.card,.data-card,.stat-card{background:#fff!important;border:1px solid #e8eaed!important;border-radius:20px!important;box-shadow:0 3px 12px rgba(60,64,67,.05)!important}
+.panel:hover,.stat-card:hover{box-shadow:0 10px 28px rgba(60,64,67,.08)!important}
+h1,h2,h3{font-family:'Plus Jakarta Sans',sans-serif!important;color:#202124!important;letter-spacing:-.02em}
+.muted{color:#6b7280!important}
+input,select,textarea{background:#fff!important;color:#202124!important;border:1px solid #dadce0!important;border-radius:12px!important;box-shadow:none!important}
+input:focus,select:focus,textarea:focus{border-color:#6750a4!important;box-shadow:0 0 0 4px rgba(103,80,164,.12)!important;outline:none!important}
+.btn{border-radius:999px!important;background:#f1f3f4!important;color:#202124!important;border:0!important;padding:11px 18px!important;font-weight:700!important;box-shadow:none!important}
+.btn:hover{transform:translateY(-1px)!important;box-shadow:0 4px 12px rgba(60,64,67,.12)!important}
+.btn.primary,.primary{background:linear-gradient(135deg,#6750a4,#7f67be)!important;color:#fff!important}
+.btn.danger,.danger{background:#fce8e6!important;color:#c5221f!important}
+.notice.ok{background:#e6f4ea!important;color:#137333!important;border:1px solid #ceead6!important}
+.notice.err{background:#fce8e6!important;color:#b3261e!important;border:1px solid #f6c9c5!important}
+table{background:#fff!important;border-radius:16px!important;overflow:hidden!important}
+th{background:#f8f9fa!important;color:#5f6368!important}
+td,th{border-color:#edf0f2!important;color:#202124!important}
+::-webkit-scrollbar{width:10px}::-webkit-scrollbar-thumb{background:#d6d9df;border-radius:20px}
+@media(max-width:800px){.sidebar{box-shadow:0 12px 40px rgba(60,64,67,.16)!important}.panel,.card{border-radius:16px!important}}
+
 </style>
 </head>
 <body>
