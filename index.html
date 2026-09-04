@@ -127,8 +127,21 @@ const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 let categories=[];
 
 function msg(id,text,type='ok'){const e=document.getElementById(id);e.textContent=text;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
-function showPage(id,btn){if(id==='banners'){try{await loadBanners()}catch(e){console.error(e)}}
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
+
+// FIX: fungsi ini sebelumnya "function showPage(...)" (tanpa async) padahal
+// isinya memakai "await loadBanners()". Itu SyntaxError di browser dan bikin
+// SELURUH <script> gagal dimuat -> semua fungsi (termasuk login()) jadi
+// tidak terdefinisi. Sekarang dijadikan async function.
+async function showPage(id,btn){
+  if(id==='banners'){try{await loadBanners()}catch(e){console.error(e)}}
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';
+  loadPage(id)
+}
+
 async function login(){
  const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
  const {data,error}=await sb.auth.signInWithPassword({email,password});
