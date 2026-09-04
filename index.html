@@ -240,7 +240,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
   <div class="page" id="questions">
    <div class="panel"><div class="panel-head"><h3>➕ Tambah Soal</h3></div>
     <div class="form-grid">
-     <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
+     <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div><div><label>Tingkat Kesulitan</label><select id="qDifficulty"><option value="">Tidak ditentukan</option><option value="mudah">Mudah</option><option value="sedang">Sedang</option><option value="sulit">Sulit</option></select></div><div><label>Tahun Soal</label><input id="qYear" type="number" min="2000" max="2100" placeholder="2026"></div>
      <div class="full"><label>Pertanyaan</label><textarea id="qText"></textarea></div>
      <div><label>Opsi A</label><input id="qA"></div><div><label>Opsi B</label><input id="qB"></div><div><label>Opsi C</label><input id="qC"></div><div><label>Opsi D</label><input id="qD"></div><div><label>Opsi E (opsional)</label><input id="qE"></div><div><label>Jawaban Benar</label><select id="qCorrect"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
      <div class="full"><label>Pembahasan</label><textarea id="qExplain"></textarea></div>
@@ -345,7 +345,7 @@ async function loadCategories(){const {data}=await sb.from('categories').select(
 async function loadPage(id){
  if(id==='categories'){const {data}=await sb.from('categories').select('id,name,slug,icon,sort_order,is_active').order('sort_order');renderTable('categoriesList',data,['name','slug','icon','sort_order','is_active'],true,'categories')}
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
- if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
+ if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,difficulty,question_year,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','difficulty','question_year','question_text'],true,'questions')}
  if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
  if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
@@ -356,7 +356,7 @@ function renderTable(target,data,cols,deletable,table){
 }
 async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)return alert(error.message);if(table==='categories')await loadCategories();loadPage(table==='questions'?'questions':table)}
 async function addQuestion(){
- const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
+ const payload={category_id:qCategory.value||null,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null,difficulty:qDifficulty.value||null,question_year:qYear.value?Number(qYear.value):null};
  if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
  const {error}=await sb.from('questions').insert(payload);if(error)return msg('qMsg',error.message,'err');msg('qMsg','✅ Soal berhasil disimpan!');['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');loadPage('questions');
 }
