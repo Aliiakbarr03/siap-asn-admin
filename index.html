@@ -45,6 +45,7 @@
  <aside class="sidebar">
   <div class="side-brand"><div class="brand"><div class="mark">SA</div><span>SIAP ASN</span></div></div>
   <button class="navbtn active" onclick="showPage('dashboard',this)">🏠 <span>Dashboard</span></button>
+  <button class="navbtn" onclick="showPage('categories',this)">🗂️ <span>Kategori</span></button>
   <button class="navbtn" onclick="showPage('questions',this)">📝 <span>Bank Soal</span></button>
   <button class="navbtn" onclick="showPage('materials',this)">📚 <span>Materi</span></button>
   <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout</span></button>
@@ -61,6 +62,20 @@
     <div class="stat">📚 Materi<b id="statMaterials">0</b></div><div class="stat">🏆 Tryout<b id="statTryouts">0</b></div>
    </div>
    <div class="panel"><h3>🔥 SIAP ASN Admin Panel</h3><p class="muted">Database sudah terhubung ke Supabase. Tambahkan konten dari menu sebelah kiri.</p></div>
+  </div>
+
+  <div class="page" id="categories">
+   <div class="panel"><div class="panel-head"><h3>➕ Tambah Kategori</h3></div>
+    <div class="form-grid">
+     <div><label>Nama Kategori</label><input id="catName" oninput="if(!catSlug.dataset.touched)catSlug.value=slugify(catName.value)"></div>
+     <div><label>Slug</label><input id="catSlug" oninput="catSlug.dataset.touched='1'"></div>
+     <div><label>Icon (emoji, opsional)</label><input id="catIcon" placeholder="📘"></div>
+     <div><label>Urutan Tampil</label><input id="catSort" type="number" min="0" value="0"></div>
+     <div class="full"><label>Deskripsi (opsional)</label><input id="catDescription"></div>
+     <div><label><input type="checkbox" id="catActive" style="width:auto" checked> Aktif</label></div>
+    </div><button class="btn primary" onclick="addCategory()">Simpan Kategori</button><div id="catMsg" class="notice"></div>
+   </div>
+   <div class="panel"><h3>Daftar Kategori</h3><div id="categoriesList"></div></div>
   </div>
 
   <div class="page" id="questions">
@@ -156,8 +171,20 @@ async function openApp(){
  document.getElementById('loginView').style.display='none';document.getElementById('appView').style.display='block';document.getElementById('adminName').textContent=profile.full_name||user.email;
  await loadCategories();await loadPage('dashboard');
 }
+function slugify(s){return String(s||'').toLowerCase().trim().replace(/[^a-z0-9\s-]/g,'').replace(/\s+/g,'-').replace(/-+/g,'-')}
+async function addCategory(){
+ const p={name:catName.value.trim(),slug:(catSlug.value.trim()||slugify(catName.value)),description:catDescription.value.trim()||null,icon:catIcon.value.trim()||null,sort_order:Number(catSort.value)||0,is_active:catActive.checked};
+ if(!p.name||!p.slug)return msg('catMsg','Nama dan slug kategori wajib diisi.','err');
+ const {error}=await sb.from('categories').insert(p);
+ if(error)return msg('catMsg',error.message,'err');
+ msg('catMsg','✅ Kategori berhasil disimpan!');
+ catName.value=catSlug.value=catDescription.value=catIcon.value='';catSort.value='0';catActive.checked=true;catSlug.dataset.touched='';
+ await loadCategories();
+ loadPage('categories');
+}
 async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
 async function loadPage(id){
+ if(id==='categories'){const {data}=await sb.from('categories').select('id,name,slug,icon,sort_order,is_active').order('sort_order');renderTable('categoriesList',data,['name','slug','icon','sort_order','is_active'],true,'categories')}
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
  if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
  if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
@@ -168,7 +195,7 @@ function renderTable(target,data,cols,deletable,table){
  const el=document.getElementById(target);if(!data?.length){el.innerHTML='<div class="empty">Belum ada data.</div>';return}
  el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
 }
-async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)alert(error.message);else loadPage(table==='questions'?'questions':table)}
+async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)return alert(error.message);if(table==='categories')await loadCategories();loadPage(table==='questions'?'questions':table)}
 async function addQuestion(){
  const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
  if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
@@ -245,7 +272,7 @@ async function saveBanner(){
       title:title,
       subtitle:subtitle,
       image_url:publicUrl,
-      link_url:link,
+      action_url:link,
       sort_order:sortOrder,
       is_active:isActive
     });
