@@ -16,7 +16,7 @@
 .side-brand{padding:5px 10px 25px}.navbtn{width:100%;text-align:left;border:0;background:transparent;color:var(--muted);padding:13px 14px;border-radius:12px;margin:3px 0;font-weight:650}.navbtn:hover,.navbtn.active{background:rgba(32,213,255,.1);color:#fff}
 .main{margin-left:250px;padding:28px;max-width:1450px}.top{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:28px}.top h1{margin:0;font-size:28px}.userbox{display:flex;gap:10px;align-items:center}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px}.stat b{font-size:28px;display:block;margin-top:8px}
-.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.toolbar>div{flex:1;min-width:170px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}.tag{display:inline-block;padding:5px 9px;border-radius:999px;background:rgba(32,213,255,.12);color:#8eeaff;font-size:12px;font-weight:800}.question-picker{max-height:420px;overflow:auto;border:1px solid var(--line);border-radius:16px;padding:8px;background:#071a35}.pick-item{display:flex;gap:12px;align-items:flex-start;padding:13px;border-bottom:1px solid var(--line);cursor:pointer}.pick-item:last-child{border-bottom:0}.pick-item:hover{background:rgba(255,255,255,.04)}.pick-item input{width:20px;height:20px;margin-top:3px}.pick-text{font-size:14px;line-height:1.45}.picker-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.page{display:none}.page.active{display:block}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}.panel-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:15px}table{width:100%;border-collapse:collapse}th,td{padding:12px;text-align:left;border-bottom:1px solid var(--line);font-size:14px}th{color:var(--muted)}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.full{grid-column:1/-1}.row-actions{display:flex;gap:7px}.empty{color:var(--muted);text-align:center;padding:28px}.notice{margin-top:15px;padding:12px;border-radius:12px;display:none}.ok{background:rgba(50,210,150,.12);color:#76efbd}.err{background:rgba(255,99,120,.12);color:#ff9aa8}
 @media(max-width:850px){.sidebar{width:70px;padding:14px 8px}.side-brand .brand span:last-child,.navbtn span{display:none}.navbtn{text-align:center;font-size:20px}.main{margin-left:70px;padding:16px}.grid{grid-template-columns:1fr 1fr}.form-grid{grid-template-columns:1fr}.full{grid-column:auto}}
 </style>
 </head>
@@ -56,115 +56,34 @@
   </div>
 
   <div class="page" id="questions">
-   <div class="panel">
-    <div class="panel-head"><div><h3 id="qFormTitle">➕ Tambah Soal</h3><div class="muted">Masukkan soal satu per satu ke bank soal.</div></div><span class="tag" id="questionTotal">0 soal</span></div>
+   <div class="panel"><div class="panel-head"><h3>➕ Tambah Soal</h3></div>
     <div class="form-grid">
      <div><label>Kategori</label><select id="qCategory"></select></div><div><label>Jenis</label><select id="qType"><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
-     <div class="full"><label>Pertanyaan</label><textarea id="qText" placeholder="Tulis pertanyaan di sini..."></textarea></div>
+     <div class="full"><label>Pertanyaan</label><textarea id="qText"></textarea></div>
      <div><label>Opsi A</label><input id="qA"></div><div><label>Opsi B</label><input id="qB"></div><div><label>Opsi C</label><input id="qC"></div><div><label>Opsi D</label><input id="qD"></div><div><label>Opsi E (opsional)</label><input id="qE"></div><div><label>Jawaban Benar</label><select id="qCorrect"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option></select></div>
-     <div class="full"><label>Pembahasan</label><textarea id="qExplain" placeholder="Penjelasan jawaban untuk peserta..."></textarea></div>
-    </div>
-    <div class="row-actions"><button class="btn primary" id="qSaveBtn" onclick="saveQuestion()">💾 Simpan Soal</button><button class="btn ghost" id="qCancelBtn" onclick="resetQuestionForm()" style="display:none">Batal Edit</button></div>
-    <input type="hidden" id="qEditId"><div id="qMsg" class="notice"></div>
+     <div class="full"><label>Pembahasan</label><textarea id="qExplain"></textarea></div>
+    </div><button class="btn primary" onclick="addQuestion()">Simpan Soal</button><div id="qMsg" class="notice"></div>
    </div>
-   <div class="panel">
-    <div class="panel-head"><div><h3>📚 Bank Soal</h3><div class="muted">Cari, filter, edit, atau hapus soal.</div></div></div>
-    <div class="toolbar">
-      <div><label>Cari soal</label><input id="qSearch" placeholder="Ketik kata..." oninput="loadQuestions()"></div>
-      <div><label>Filter jenis</label><select id="qFilterType" onchange="loadQuestions()"><option value="">Semua jenis</option><option value="twk">TWK</option><option value="tiu">TIU</option><option value="tkp">TKP</option><option value="other">Lainnya</option></select></div>
-      <div><label>Filter kategori</label><select id="qFilterCategory" onchange="loadQuestions()"><option value="">Semua kategori</option></select></div>
-    </div>
-    <div id="questionsList"></div>
-   </div>
+   <div class="panel"><h3>Bank Soal Terbaru</h3><div id="questionsList"></div></div>
   </div>
 
   <div class="page" id="materials">
-   <div class="panel">
-    <div class="panel-head"><div><h3 id="mFormTitle">📚 Tambah Materi</h3><div class="muted">Kelola materi belajar SIAP ASN.</div></div><span class="tag" id="materialTotal">0 materi</span></div>
-    <div class="form-grid">
-      <div><label>Kategori</label><select id="mCategory"></select></div>
-      <div><label>Judul Materi</label><input id="mTitle" placeholder="Contoh: Wawasan Kebangsaan"></div>
-      <div class="full"><label>Ringkasan</label><input id="mSummary" placeholder="Ringkasan singkat materi..."></div>
-      <div class="full"><label>Isi Materi</label><textarea id="mContent" placeholder="Tulis isi materi lengkap di sini..."></textarea></div>
-      <div><label>Akses Materi</label><select id="mPremium"><option value="false">🆓 Gratis</option><option value="true">👑 Premium</option></select></div>
-      <div><label>Status</label><select id="mPublished"><option value="true">👁️ Published</option><option value="false">📝 Draft</option></select></div>
-    </div>
-    <input type="hidden" id="mEditId">
-    <div class="row-actions"><button class="btn primary" id="mSaveBtn" onclick="saveMaterial()">💾 Simpan Materi</button><button class="btn ghost" id="mCancelBtn" onclick="resetMaterialForm()" style="display:none">Batal Edit</button></div>
-    <div id="mMsg" class="notice"></div>
-   </div>
-   <div class="panel">
-    <div class="panel-head"><div><h3>📚 Daftar Materi</h3><div class="muted">Cari, filter, edit, atau hapus materi.</div></div></div>
-    <div class="toolbar">
-      <div><label>Cari Materi</label><input id="mSearch" placeholder="Cari judul..." oninput="loadMaterials()"></div>
-      <div><label>Filter Akses</label><select id="mFilterPremium" onchange="loadMaterials()"><option value="">Semua</option><option value="false">Gratis</option><option value="true">Premium</option></select></div>
-      <div><label>Filter Status</label><select id="mFilterPublished" onchange="loadMaterials()"><option value="">Semua</option><option value="true">Published</option><option value="false">Draft</option></select></div>
-    </div>
-    <div id="materialsList"></div>
-   </div>
+   <div class="panel"><h3>➕ Tambah Materi</h3><div class="form-grid"><div><label>Kategori</label><select id="mCategory"></select></div><div><label>Judul</label><input id="mTitle"></div><div class="full"><label>Ringkasan</label><input id="mSummary"></div><div class="full"><label>Isi Materi</label><textarea id="mContent"></textarea></div><div><label><input type="checkbox" id="mPremium" style="width:auto"> Premium</label></div><div><label><input type="checkbox" id="mPublished" style="width:auto" checked> Publikasikan</label></div></div><button class="btn primary" onclick="addMaterial()">Simpan Materi</button></div>
+   <div class="panel"><h3>Daftar Materi</h3><div id="materialsList"></div></div>
   </div>
 
   <div class="page" id="tryouts">
-   <div class="panel">
-    <div class="panel-head"><div><h3>🏆 Buat Tryout</h3><div class="muted">Pilih soal dari Bank Soal, lalu publish saat sudah siap.</div></div><span class="tag" id="selectedQuestionCount">0 soal dipilih</span></div>
-    <div class="form-grid">
-      <div><label>Judul Tryout</label><input id="tTitle" placeholder="Contoh: Tryout CPNS Sesi 1"></div>
-      <div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live Tryout</option></select></div>
-      <div><label>Durasi (menit)</label><input id="tDuration" type="number" min="1" value="90"></div>
-      <div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div>
-      <div><label>Percobaan maksimal</label><input id="tMaxAttempts" type="number" min="1" value="1"></div>
-      <div><label>Akses</label><select id="tPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div>
-      <div class="full"><label>Deskripsi</label><textarea id="tDescription" placeholder="Deskripsi singkat tryout..."></textarea></div>
-    </div>
-    <label>Pilih Soal dari Bank Soal</label>
-    <div class="picker-head"><input id="tryoutQuestionSearch" placeholder="🔎 Cari soal..." oninput="loadTryoutQuestionPicker()"><button class="btn ghost" onclick="toggleAllTryoutQuestions()">Pilih/Batal Semua</button></div>
-    <div class="question-picker" id="tryoutQuestionPicker"></div>
-    <div class="row-actions" style="margin-top:16px"><button class="btn primary" onclick="addTryout()">🚀 Buat Tryout</button></div>
-    <div id="tMsg" class="notice"></div>
-   </div>
-   <div class="panel"><h3>📋 Daftar Tryout</h3><div id="tryoutsList"></div></div>
+   <div class="panel"><h3>🏆 Buat Tryout</h3><div class="form-grid"><div><label>Judul</label><input id="tTitle"></div><div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div class="full"><label>Deskripsi</label><textarea id="tDescription"></textarea></div></div><button class="btn primary" onclick="addTryout()">Buat Tryout</button></div>
+   <div class="panel"><h3>Daftar Tryout</h3><div id="tryoutsList"></div></div>
   </div>
 
-  <div class="page" id="live">
- <div class="panel">
-  <div class="panel-head"><div><h3>🔴 Jadwal Live Tryout</h3><div class="muted">Atur waktu mulai, selesai, dan pengumuman hasil.</div></div><span class="tag" id="liveCount">0 live</span></div>
-  <div class="form-grid">
-   <div><label>Pilih Live Tryout</label><select id="liveTryoutSelect"></select></div>
-   <div><label>Status</label><select id="liveStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div>
-   <div><label>Mulai</label><input id="liveStart" type="datetime-local"></div>
-   <div><label>Selesai</label><input id="liveEnd" type="datetime-local"></div>
-   <div><label>Hasil / Ranking Dibuka</label><input id="liveResult" type="datetime-local"></div>
-   <div><label>Durasi</label><input id="liveDuration" type="number" min="1" placeholder="Otomatis dari Tryout"></div>
-  </div>
-  <button class="btn primary" onclick="saveLiveSchedule()">💾 Simpan Jadwal Live</button><div id="liveMsg" class="notice"></div>
- </div>
- <div class="panel"><h3>🏆 Live Tryout & Ranking</h3><div id="liveList"></div></div>
-</div>
-  <div class="page" id="banners">
- <div class="panel">
-  <div class="panel-head"><div><h3 id="bFormTitle">🖼️ Tambah Banner</h3><div class="muted">Upload banner langsung ke Supabase Storage.</div></div><span class="tag" id="bannerTotal">0 banner</span></div>
-  <div class="form-grid">
-   <div><label>Judul Banner</label><input id="bTitle" placeholder="Contoh: Tryout Gratis Minggu Ini"></div>
-   <div><label>Urutan Tampil</label><input id="bSort" type="number" value="1"></div>
-   <div class="full"><label>Subtitle</label><input id="bSubtitle" placeholder="Teks tambahan (opsional)"></div>
-   <div><label>Link Tujuan</label><input id="bActionUrl" placeholder="https://... (opsional)"></div>
-   <div><label>Gambar Banner</label><input id="bImage" type="file" accept="image/png,image/jpeg,image/webp"></div>
-   <div><label>Status</label><select id="bActive"><option value="true">🟢 Aktif</option><option value="false">⚪ Tidak Aktif</option></select></div>
-   <div><label>Mulai Tampil</label><input id="bStartsAt" type="datetime-local"></div>
-   <div><label>Selesai Tampil</label><input id="bEndsAt" type="datetime-local"></div>
-   <div class="full" id="bannerPreviewBox" style="display:none"><label>Preview</label><img id="bannerPreview" style="max-width:100%;max-height:240px;border-radius:16px;border:1px solid var(--line)"></div>
-  </div>
-  <input type="hidden" id="bEditId">
-  <div class="row-actions"><button class="btn primary" id="bSaveBtn" onclick="saveBanner()">⬆️ Upload & Simpan Banner</button><button class="btn ghost" id="bCancelBtn" onclick="resetBannerForm()" style="display:none">Batal Edit</button></div>
-  <div id="bMsg" class="notice"></div>
- </div>
- <div class="panel"><h3>🖼️ Daftar Banner</h3><div id="bannersList"></div></div>
-</div>
+  <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
+  <div class="page" id="banners"><div class="panel"><h3>🖼️ Banner</h3><p class="muted">Tahap berikutnya: upload gambar ke Supabase Storage langsung dari panel ini.</p></div></div>
   <div class="page" id="users"><div class="panel"><h3>👥 Pengguna</h3><div id="usersList"></div></div></div>
  </main>
 </section>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
 const SUPABASE_URL = "https://qinxnrcdsmxduhvrnzfh.supabase.co";
 const SUPABASE_KEY = "sb_publishable__o_Qj-DptS7XEcYyi9CrSQ_pY3E5RSX";
@@ -174,34 +93,56 @@ let categories=[];
 function msg(id,text,type='ok'){const e=document.getElementById(id);e.textContent=text;e.className='notice '+type;e.style.display='block';setTimeout(()=>e.style.display='none',4000)}
 function showPage(id,btn){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById(id).classList.add('active');document.querySelectorAll('.navbtn').forEach(x=>x.classList.remove('active'));if(btn)btn.classList.add('active');document.getElementById('pageTitle').textContent=btn?btn.innerText.trim():'Dashboard';loadPage(id)}
 async function login(){
- const email=document.getElementById('email').value.trim(),password=document.getElementById('password').value;
- if(!email||!password)return msg('loginMsg','Email dan password wajib diisi.','err');
- const btn=document.querySelector('#loginView button.primary');if(btn){btn.disabled=true;btn.textContent='Memproses...'}
+ const email=document.getElementById('email').value.trim();
+ const password=document.getElementById('password').value;
+ if(!email || !password){
+  msg('loginMsg','Email dan password wajib diisi.','err');
+  return;
+ }
  try{
   const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error)throw error;
-  await openApp();
- }catch(error){console.error(error);msg('loginMsg','Login gagal: '+(error.message||'Terjadi kesalahan.'),'err')}
- finally{if(btn){btn.disabled=false;btn.textContent='Masuk Admin →'}}
+  if(error) throw error;
+  await openApp(data.user);
+ }catch(error){
+  msg('loginMsg',error.message || 'Login gagal.','err');
+ }
 }
-async function logout(){await sb.auth.signOut();location.reload()}
-async function openApp(){
- const {data:{user},error}=await sb.auth.getUser();
- if(error){msg('loginMsg',error.message,'err');return}
- if(!user)return;
- document.getElementById('loginView').style.display='none';
- document.getElementById('appView').style.display='block';
- document.getElementById('adminName').textContent=user.email||'Administrator';
- try{await loadCategories();await loadPage('dashboard')}catch(e){console.error(e)}
+async function logout(){
+ await sb.auth.signOut();
+ document.getElementById('appView').style.display='none';
+ document.getElementById('loginView').style.display='grid';
+ document.getElementById('password').value='';
 }
-async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);if(el)el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}const filter=document.getElementById('qFilterCategory');if(filter)filter.innerHTML='<option value="">Semua kategori</option>'+categories.map(c=>`<option value="${c.id}">${c.name}</option>`).join('')}
+async function openApp(existingUser){
+ try{
+  let user=existingUser;
+  if(!user){
+   const {data,error}=await sb.auth.getUser();
+   if(error) throw error;
+   user=data.user;
+  }
+  if(!user) return;
+
+  document.getElementById('loginView').style.display='none';
+  document.getElementById('appView').style.display='block';
+  document.getElementById('adminName').textContent=user.email || 'Administrator';
+
+  try{
+   await loadCategories();
+   await loadPage('dashboard');
+  }catch(error){
+   console.error('Admin content error:',error);
+  }
+ }catch(error){
+  msg('loginMsg',error.message || 'Gagal membuka panel admin.','err');
+ }
+}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory']){const el=document.getElementById(id);el.innerHTML=categories.map(c=>`<option value="${c.id}">${c.icon||''} ${c.name}</option>`).join('')}}
 async function loadPage(id){
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
- if(id==='questions')await loadQuestions()
- if(id==='materials')await loadMaterials()
- if(id==='tryouts'){await loadTryoutQuestionPicker();await loadTryouts()}
- if(id==='live')await loadLivePanel()
- if(id==='banners')await loadBanners();
+ if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','question_text'],true,'questions')}
+ if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
+ if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
 }
 function renderTable(target,data,cols,deletable,table){
@@ -209,147 +150,24 @@ function renderTable(target,data,cols,deletable,table){
  el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
 }
 async function deleteRow(table,id){if(!confirm('Hapus data ini?'))return;const {error}=await sb.from(table).delete().eq('id',id);if(error)alert(error.message);else loadPage(table==='questions'?'questions':table)}
-async function loadQuestions(){
- let query=sb.from('questions').select('id,category_id,type,question_text,option_a,option_b,option_c,option_d,option_e,correct_answer,explanation,created_at',{count:'exact'}).order('created_at',{ascending:false});
- const type=document.getElementById('qFilterType')?.value||'',cat=document.getElementById('qFilterCategory')?.value||'',search=(document.getElementById('qSearch')?.value||'').trim();
- if(type)query=query.eq('type',type);if(cat)query=query.eq('category_id',cat);if(search)query=query.ilike('question_text','%'+search+'%');
- const {data,error,count}=await query.limit(100);
- document.getElementById('questionTotal').textContent=(count||0)+' soal';
- const el=document.getElementById('questionsList');
- if(error){el.innerHTML='<div class="notice err" style="display:block">'+error.message+'</div>';return}
- if(!data?.length){el.innerHTML='<div class="empty">Belum ada soal.</div>';return}
- const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- el.innerHTML='<table><thead><tr><th>Jenis</th><th>Pertanyaan</th><th>Jawaban</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td><span class="tag">'+esc(r.type).toUpperCase()+'</span></td><td>'+esc(r.question_text).slice(0,140)+(r.question_text.length>140?'…':'')+'</td><td>'+esc(r.correct_answer)+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editQuestion(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteRow(\'questions\',\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
- window.questionCache=data;
-}
-async function saveQuestion(){
- const payload={category_id:qCategory.value||null,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
+async function addQuestion(){
+ const payload={category_id:qCategory.value,type:qType.value,question_text:qText.value.trim(),option_a:qA.value.trim(),option_b:qB.value.trim(),option_c:qC.value.trim(),option_d:qD.value.trim(),option_e:qE.value.trim()||null,correct_answer:qCorrect.value,explanation:qExplain.value.trim()||null};
  if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
- const editId=qEditId.value;
- let error;
- if(editId){({error}=await sb.from('questions').update(payload).eq('id',editId))}
- else {const {data:{user}}=await sb.auth.getUser();if(user)payload.created_by=user.id;({error}=await sb.from('questions').insert(payload))}
- if(error)return msg('qMsg',error.message,'err');
- msg('qMsg',editId?'✅ Soal berhasil diperbarui!':'✅ Soal berhasil disimpan!');
- resetQuestionForm();loadQuestions();loadPage('dashboard');
+ const {error}=await sb.from('questions').insert(payload);if(error)return msg('qMsg',error.message,'err');msg('qMsg','✅ Soal berhasil disimpan!');['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');loadPage('questions');
 }
-async function editQuestion(id){
- const r=(window.questionCache||[]).find(x=>x.id===id);if(!r)return;
- qEditId.value=r.id;qCategory.value=r.category_id||'';qType.value=r.type;qText.value=r.question_text;qA.value=r.option_a;qB.value=r.option_b;qC.value=r.option_c;qD.value=r.option_d;qE.value=r.option_e||'';qCorrect.value=r.correct_answer||'A';qExplain.value=r.explanation||'';
- qFormTitle.textContent='✏️ Edit Soal';qSaveBtn.textContent='💾 Simpan Perubahan';qCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'});
-}
-function resetQuestionForm(){qEditId.value='';qFormTitle.textContent='➕ Tambah Soal';qSaveBtn.textContent='💾 Simpan Soal';qCancelBtn.style.display='none';['qText','qA','qB','qC','qD','qE','qExplain'].forEach(id=>document.getElementById(id).value='');qCorrect.value='A';}
-let materialCache=[];
-async function loadMaterials(){
- let query=sb.from('materials').select('id,category_id,title,summary,content,is_premium,is_published,created_at',{count:'exact'}).order('created_at',{ascending:false});
- const search=(mSearch?.value||'').trim(),premium=mFilterPremium?.value||'',published=mFilterPublished?.value||'';
- if(search)query=query.ilike('title','%'+search+'%');if(premium!=='')query=query.eq('is_premium',premium==='true');if(published!=='')query=query.eq('is_published',published==='true');
- const {data,error,count}=await query.limit(100);materialCache=data||[];materialTotal.textContent=(count||0)+' materi';
- const el=document.getElementById('materialsList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
- if(!data?.length){el.innerHTML='<div class="empty">Belum ada materi.</div>';return}
- el.innerHTML='<table><thead><tr><th>Judul</th><th>Akses</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td>'+r.title+'</td><td><span class="tag">'+(r.is_premium?'👑 Premium':'🆓 Gratis')+'</span></td><td>'+ (r.is_published?'👁️ Published':'📝 Draft')+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editMaterial(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteMaterial(\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
-}
-async function saveMaterial(){
- const p={category_id:mCategory.value||null,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.value==='true',is_published:mPublished.value==='true'};
- if(!p.title)return msg('mMsg','Judul materi wajib diisi.','err');
- const id=mEditId.value;let error;
- if(id)({error}=await sb.from('materials').update(p).eq('id',id));else {const {data:{user}}=await sb.auth.getUser();if(user)p.created_by=user.id;({error}=await sb.from('materials').insert(p))}
- if(error)return msg('mMsg',error.message,'err');
- msg('mMsg',id?'✅ Materi berhasil diperbarui!':'✅ Materi berhasil disimpan!');
- resetMaterialForm();loadMaterials();loadPage('dashboard');
-}
-function editMaterial(id){const r=materialCache.find(x=>x.id===id);if(!r)return;mEditId.value=r.id;mCategory.value=r.category_id||'';mTitle.value=r.title||'';mSummary.value=r.summary||'';mContent.value=r.content||'';mPremium.value=String(!!r.is_premium);mPublished.value=String(!!r.is_published);mFormTitle.textContent='✏️ Edit Materi';mSaveBtn.textContent='💾 Simpan Perubahan';mCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'})}
-function resetMaterialForm(){mEditId.value='';mTitle.value=mSummary.value=mContent.value='';mPremium.value='false';mPublished.value='true';mFormTitle.textContent='📚 Tambah Materi';mSaveBtn.textContent='💾 Simpan Materi';mCancelBtn.style.display='none'}
-async function deleteMaterial(id){if(!confirm('Hapus materi ini?'))return;const {error}=await sb.from('materials').delete().eq('id',id);if(error)return alert(error.message);loadMaterials()}
-let bannerCache=[];
-async function loadLivePanel(){
- const {data,error}=await sb.from('tryouts').select('id,title,status,duration_minutes,available_from,available_until,result_release_at,is_premium,tryout_attempts(score,correct_count,submitted_at,status)').eq('type','live').order('available_from',{ascending:false});
- const list=data||[],sel=document.getElementById('liveTryoutSelect');liveCount.textContent=list.length+' live';
- sel.innerHTML=list.length?list.map(x=>'<option value="'+x.id+'">'+x.title+'</option>').join(''):'<option value="">Belum ada Live Tryout</option>';
- const el=document.getElementById('liveList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
- if(!list.length){el.innerHTML='<div class="empty">Belum ada Tryout bertipe LIVE. Buat dulu dari menu Tryout.</div>';return}
- el.innerHTML='<table><thead><tr><th>Live Tryout</th><th>Jadwal</th><th>Peserta</th><th>Ranking Sementara</th></tr></thead><tbody>'+list.map(r=>{const attempts=(r.tryout_attempts||[]).filter(a=>a.status==='submitted').sort((a,b)=>(b.score||0)-(a.score||0)||new Date(a.submitted_at)-new Date(b.submitted_at));const top=attempts.slice(0,3).map((a,i)=>'#'+(i+1)+' '+(a.score||0)).join(' • ')||'-';return '<tr><td>'+r.title+'</td><td>'+ (r.available_from?new Date(r.available_from).toLocaleString('id-ID'):'Belum dijadwalkan')+'</td><td>'+attempts.length+'</td><td>'+top+'</td></tr>'}).join('')+'</tbody></table>';
-}
-async function saveLiveSchedule(){
- const id=liveTryoutSelect.value;if(!id)return msg('liveMsg','Buat Live Tryout terlebih dahulu.','err');
- const start=liveStart.value,end=liveEnd.value,result=liveResult.value;
- if(!start||!end)return msg('liveMsg','Waktu mulai dan selesai wajib diisi.','err');
- if(new Date(end)<=new Date(start))return msg('liveMsg','Waktu selesai harus setelah waktu mulai.','err');
- const p={status:liveStatus.value,available_from:new Date(start).toISOString(),available_until:new Date(end).toISOString(),result_release_at:result?new Date(result).toISOString():null};
- if(liveDuration.value) p.duration_minutes = Number(liveDuration.value);
- const {error}=await sb.from('tryouts').update(p).eq('id',id);if(error)return msg('liveMsg',error.message,'err');
- msg('liveMsg','🔴 Jadwal Live Tryout berhasil disimpan!');loadLivePanel();
-}
-async function loadBanners(){
- const {data,error,count}=await sb.from('banners').select('*',{count:'exact'}).order('sort_order').order('created_at',{ascending:false});
- bannerCache=data||[];bannerTotal.textContent=(count||0)+' banner';
- const el=document.getElementById('bannersList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
- if(!data?.length){el.innerHTML='<div class="empty">Belum ada banner.</div>';return}
- el.innerHTML='<table><thead><tr><th>Banner</th><th>Status</th><th>Urutan</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td><div style="display:flex;gap:10px;align-items:center"><img src="'+r.image_url+'" style="width:90px;height:48px;object-fit:cover;border-radius:8px"><span>'+r.title+'</span></div></td><td>'+ (r.is_active?'🟢 Aktif':'⚪ Nonaktif')+'</td><td>'+r.sort_order+'</td><td><div class="row-actions"><button class="btn ghost" onclick="editBanner(\''+r.id+'\')">Edit</button><button class="btn danger" onclick="deleteBanner(\''+r.id+'\')">Hapus</button></div></td></tr>').join('')+'</tbody></table>';
-}
-async function saveBanner(){
- const title=bTitle.value.trim();if(!title)return msg('bMsg','Judul banner wajib diisi.','err');
- const editId=bEditId.value,file=bImage.files?.[0];let image_url;
- if(editId){const old=bannerCache.find(x=>x.id===editId);image_url=old?.image_url}
- if(file){
-  if(file.size>5*1024*1024)return msg('bMsg','Ukuran gambar maksimal 5 MB.','err');
-  const ext=file.name.split('.').pop().toLowerCase(),path='banner-'+Date.now()+'.'+ext;
-  const {error:uploadError}=await sb.storage.from('banners').upload(path,file,{cacheControl:'3600',upsert:false});
-  if(uploadError)return msg('bMsg',uploadError.message,'err');
-  image_url=sb.storage.from('banners').getPublicUrl(path).data.publicUrl;
+async function addMaterial(){const p={category_id:mCategory.value,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('materials').insert(p);if(error)return alert(error.message);mTitle.value=mSummary.value=mContent.value='';loadPage('materials')}
+async function addTryout(){const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||100};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('tryouts').insert(p);if(error)return alert(error.message);tTitle.value=tDescription.value='';loadPage('tryouts')}
+document.getElementById('password').addEventListener('keydown',function(e){
+ if(e.key==='Enter') login();
+});
+(async()=>{
+ try{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session) await openApp(session.user);
+ }catch(error){
+  console.error(error);
  }
- if(!image_url)return msg('bMsg','Pilih gambar banner terlebih dahulu.','err');
- const p={title,subtitle:bSubtitle.value.trim()||null,image_url,action_url:bActionUrl.value.trim()||null,sort_order:Number(bSort.value)||1,is_active:bActive.value==='true',starts_at:bStartsAt.value?new Date(bStartsAt.value).toISOString():null,ends_at:bEndsAt.value?new Date(bEndsAt.value).toISOString():null};
- let error;if(editId)({error}=await sb.from('banners').update(p).eq('id',editId));else({error}=await sb.from('banners').insert(p)});
- if(error)return msg('bMsg',error.message,'err');msg('bMsg','🎉 Banner berhasil disimpan!');resetBannerForm();loadBanners();
-}
-function editBanner(id){const r=bannerCache.find(x=>x.id===id);if(!r)return;bEditId.value=r.id;bTitle.value=r.title||'';bSubtitle.value=r.subtitle||'';bActionUrl.value=r.action_url||'';bSort.value=r.sort_order||1;bActive.value=String(!!r.is_active);bStartsAt.value=r.starts_at?new Date(r.starts_at).toISOString().slice(0,16):'';bEndsAt.value=r.ends_at?new Date(r.ends_at).toISOString().slice(0,16):'';bannerPreview.src=r.image_url;bannerPreviewBox.style.display='block';bFormTitle.textContent='✏️ Edit Banner';bSaveBtn.textContent='💾 Simpan Perubahan';bCancelBtn.style.display='inline-block';window.scrollTo({top:0,behavior:'smooth'})}
-function resetBannerForm(){bEditId.value='';bTitle.value=bSubtitle.value=bActionUrl.value='';bImage.value='';bSort.value=1;bActive.value='true';bStartsAt.value=bEndsAt.value='';bannerPreviewBox.style.display='none';bFormTitle.textContent='🖼️ Tambah Banner';bSaveBtn.textContent='⬆️ Upload & Simpan Banner';bCancelBtn.style.display='none'}
-async function deleteBanner(id){if(!confirm('Hapus banner ini?'))return;const r=bannerCache.find(x=>x.id===id);const {error}=await sb.from('banners').delete().eq('id',id);if(error)return alert(error.message);if(r?.image_url){const m=r.image_url.match(/\/banners\/(.+)$/);if(m)await sb.storage.from('banners').remove([m[1]])}loadBanners()}
-bImage?.addEventListener('change',()=>{const f=bImage.files?.[0];if(f){bannerPreview.src=URL.createObjectURL(f);bannerPreviewBox.style.display='block'}})
-let tryoutQuestionCache=[],selectedTryoutQuestions=new Set();
-async function loadTryoutQuestionPicker(){
- const search=(document.getElementById('tryoutQuestionSearch')?.value||'').trim();
- let query=sb.from('questions').select('id,type,question_text,is_active').eq('is_active',true).order('created_at',{ascending:false}).limit(500);
- if(search)query=query.ilike('question_text','%'+search+'%');
- const {data,error}=await query;if(error){document.getElementById('tryoutQuestionPicker').innerHTML='<div class="empty">'+error.message+'</div>';return}
- tryoutQuestionCache=data||[];
- const el=document.getElementById('tryoutQuestionPicker');
- if(!tryoutQuestionCache.length){el.innerHTML='<div class="empty">Belum ada soal aktif. Tambahkan soal dulu di Bank Soal.</div>';return}
- const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
- el.innerHTML=tryoutQuestionCache.map((q,i)=>'<label class="pick-item"><input type="checkbox" value="'+q.id+'" '+(selectedTryoutQuestions.has(q.id)?'checked':'')+' onchange="toggleTryoutQuestion(this.value,this.checked)"><div class="pick-text"><span class="tag">'+esc(q.type).toUpperCase()+'</span><div style="margin-top:7px">'+(i+1)+'. '+esc(q.question_text)+'</div></div></label>').join('');
- updateSelectedQuestionCount();
-}
-function toggleTryoutQuestion(id,checked){if(checked)selectedTryoutQuestions.add(id);else selectedTryoutQuestions.delete(id);updateSelectedQuestionCount()}
-function updateSelectedQuestionCount(){const e=document.getElementById('selectedQuestionCount');if(e)e.textContent=selectedTryoutQuestions.size+' soal dipilih'}
-function toggleAllTryoutQuestions(){const all=tryoutQuestionCache.map(x=>x.id);const allSelected=all.length&&all.every(id=>selectedTryoutQuestions.has(id));all.forEach(id=>allSelected?selectedTryoutQuestions.delete(id):selectedTryoutQuestions.add(id));loadTryoutQuestionPicker()}
-async function addTryout(){
- const title=tTitle.value.trim();
- if(!title)return msg('tMsg','Judul Tryout wajib diisi.','err');
- if(!selectedTryoutQuestions.size)return msg('tMsg','Pilih minimal 1 soal dari Bank Soal.','err');
- const {data:{user}}=await sb.auth.getUser();
- const p={title,description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||90,max_attempts:Number(tMaxAttempts.value)||1,is_premium:tPremium.value==='true',created_by:user?.id||null};
- const {data:created,error}=await sb.from('tryouts').insert(p).select('id').single();
- if(error)return msg('tMsg',error.message,'err');
- const rows=[...selectedTryoutQuestions].map((question_id,index)=>({tryout_id:created.id,question_id,question_order:index+1,points:1}));
- const {error:linkError}=await sb.from('tryout_questions').insert(rows);
- if(linkError){await sb.from('tryouts').delete().eq('id',created.id);return msg('tMsg',linkError.message,'err')}
- msg('tMsg','🎉 Tryout berhasil dibuat dengan '+rows.length+' soal!');
- tTitle.value=tDescription.value='';selectedTryoutQuestions.clear();loadTryouts();loadTryoutQuestionPicker();loadPage('dashboard');
-}
-async function loadTryouts(){
- const {data,error}=await sb.from('tryouts').select('id,title,type,status,duration_minutes,is_premium,tryout_questions(count)').order('created_at',{ascending:false});
- const el=document.getElementById('tryoutsList');if(error){el.innerHTML='<div class="empty">'+error.message+'</div>';return}
- if(!data?.length){el.innerHTML='<div class="empty">Belum ada Tryout.</div>';return}
- el.innerHTML='<table><thead><tr><th>Judul</th><th>Tipe</th><th>Soal</th><th>Durasi</th><th>Status</th><th>Aksi</th></tr></thead><tbody>'+data.map(r=>'<tr><td>'+r.title+'</td><td>'+r.type+'</td><td>'+(r.tryout_questions?.[0]?.count||0)+'</td><td>'+r.duration_minutes+' menit</td><td>'+r.status+'</td><td><button class="btn danger" onclick="deleteTryout(\''+r.id+'\')">Hapus</button></td></tr>').join('')+'</tbody></table>';
-}
-async function deleteTryout(id){if(!confirm('Hapus Tryout ini?'))return;const {error}=await sb.from('tryouts').delete().eq('id',id);if(error)return alert(error.message);await loadTryouts()}
-(async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
-
-// Login dengan tombol Enter dan pulihkan sesi jika sudah login.
-document.getElementById('email').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-document.getElementById('password').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
-sb.auth.getSession().then(({data:{session}})=>{if(session)openApp()}).catch(console.error);
+})();
 </script>
 </body>
 </html>
