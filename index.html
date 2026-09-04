@@ -189,6 +189,15 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
 /* profile-aware user table */
 .user-table-wrap{overflow:auto}.user-person{display:flex;align-items:center;gap:10px;min-width:190px}.user-person small{display:block;color:#7b8494;margin-top:3px}.user-mini-avatar,.user-mini-fallback{width:38px;height:38px;border-radius:50%;object-fit:cover}.user-mini-fallback{display:grid;place-items:center;background:linear-gradient(135deg,#6d5dfc,#ff7a66);color:#fff;font-weight:800}
 </style>
+
+<style>
+/* === SIAP ASN ADMIN MODERN CMS UI === */
+:root{--a-ink:#202124;--a-muted:#748091;--a-line:#e6e8ee;--a-bg:#f7f8fb;--a-purple:#5b50d6;--a-soft:#f0efff;--a-green:#18b77f}
+html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{font-family:Inter,DM Sans,system-ui,-apple-system,"Segoe UI",sans-serif!important}
+.app{background:linear-gradient(180deg,#fbfbfd 0,#f7f8fb 100%)!important}.sidebar{background:#fff!important;border-right:1px solid var(--a-line)!important;box-shadow:10px 0 35px rgba(40,44,63,.035)!important;padding:22px 13px!important}.side-brand{padding:4px 11px 20px!important;margin-bottom:10px!important;border-bottom:1px solid #eef0f3}.mark{width:40px!important;height:40px!important;border-radius:12px!important;background:linear-gradient(135deg,#5b50d6,#8b7fff)!important;font-size:11px!important;box-shadow:0 8px 20px rgba(91,80,214,.18)!important}.brand{font:800 19px/1.05 "Plus Jakarta Sans",Inter,sans-serif!important;color:#202124!important}.navbtn{height:44px!important;padding:0 13px!important;margin:3px 4px!important;color:#697383!important;border-radius:12px!important;display:flex!important;align-items:center!important;gap:10px!important;font-weight:700!important}.navbtn:hover{background:#f5f3ff!important;color:#5648c8!important;transform:translateX(2px)}.navbtn.active{background:linear-gradient(90deg,#f0edff,#fbfaff)!important;color:#5546c9!important;box-shadow:inset 3px 0 #6758e7!important}.main{background:transparent!important;padding:24px 28px!important;max-width:1550px!important}.top{position:sticky!important;top:16px!important;z-index:10!important;background:rgba(255,255,255,.84)!important;border:1px solid rgba(231,233,239,.96)!important;border-radius:18px!important;padding:15px 18px!important;backdrop-filter:blur(14px)!important;box-shadow:0 7px 24px rgba(40,44,63,.045)!important}.top h1{font:800 24px "Plus Jakarta Sans",Inter,sans-serif!important;letter-spacing:-.03em}.panel,.stat{background:#fff!important;border:1px solid #e7e9ee!important;border-radius:18px!important;box-shadow:0 6px 22px rgba(40,44,63,.045)!important}.panel{padding:19px!important}.panel:hover{box-shadow:0 12px 30px rgba(40,44,63,.07)!important}.stat{position:relative;overflow:hidden;padding:19px!important}.stat:after{content:"";position:absolute;width:70px;height:70px;right:-22px;top:-22px;border-radius:50%;background:#f0edff}.stat:nth-child(2):after{background:#fff0e6}.stat:nth-child(3):after{background:#eaf8f2}.stat:nth-child(4):after{background:#fbeef5}.stat b{color:#202124!important}.form-grid{gap:13px!important}label{color:#596474!important;font-weight:700!important}input,select,textarea{background:#fff!important;color:#202124!important;border:1px solid #dfe2e8!important;border-radius:11px!important;padding:11px 12px!important}input:focus,select:focus,textarea:focus{border-color:#8578ed!important;box-shadow:0 0 0 4px rgba(103,88,231,.10)!important;outline:none!important}.btn{border-radius:11px!important;background:#f3f4f7!important;color:#303640!important;border:1px solid #e4e6eb!important;font-weight:800!important}.btn.primary{background:linear-gradient(135deg,#6255df,#8a7df3)!important;color:#fff!important;border:0!important;box-shadow:0 8px 20px rgba(98,85,223,.19)!important}.btn.danger{background:#fff0ee!important;color:#bf3d31!important;border-color:#ffd5d0!important}.notice.ok{background:#eaf8f2!important;color:#14785a!important;border-color:#c8eedf!important}.notice.err{background:#fff0ee!important;color:#b83c30!important;border-color:#ffd5d0!important}table{background:#fff!important;border:1px solid #eef0f3!important;border-radius:14px!important;overflow:hidden!important}th{background:#fafbfc!important;color:#6e7785!important}td,th{border-color:#edf0f2!important;color:#202124!important}.login{background:radial-gradient(500px 240px at 13% 15%,rgba(103,88,231,.13),transparent 65%),radial-gradient(500px 240px at 88% 84%,rgba(255,122,102,.10),transparent 65%),#f7f8fb!important}.login-card{background:rgba(255,255,255,.96)!important;border:1px solid #e8eaee!important;border-radius:24px!important;box-shadow:0 25px 70px rgba(40,44,63,.12)!important}.user-person{display:flex!important;align-items:center!important;gap:10px!important}
+@media(max-width:850px){.main{margin-left:70px!important;padding:16px!important}.top{top:9px!important}.panel{border-radius:15px!important}}
+</style>
+
 </head>
 <body>
 
@@ -211,6 +220,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
   <button class="navbtn" onclick="showPage('questions',this)">📝 <span>Bank Soal</span></button>
   <button class="navbtn" onclick="showPage('materials',this)">📚 <span>Materi</span></button>
   <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout</span></button>
+   <button class="navbtn" onclick="showPage('formations',this)">🧩 <span>Formasi CPNS</span></button>
   <button class="navbtn" onclick="showPage('live',this)">🔴 <span>Live Tryout</span></button>
   <button class="navbtn" onclick="showPage('banners',this)">🖼️ <span>Banner</span></button>
   <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button><button class="navbtn" onclick="showPage('premium',this)">👑 <span>Premium</span></button><button class="navbtn" onclick="showPage('notifications',this)">🔔 <span>Notifikasi</span></button>
@@ -263,6 +273,21 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
   </div>
 
   <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
+  <div class="page" id="formations">
+   <div class="panel"><div class="panel-head"><div><h3>🧩 Kelola Formasi CPNS</h3><p class="muted">Tambahkan data formasi yang akan dibaca peserta melalui Web Publish.</p></div></div>
+    <div class="form-grid">
+      <div><label>Tahun</label><input id="fYear" type="number" min="2020" max="2100" value="2026"></div>
+      <div><label>Instansi</label><input id="fAgency" placeholder="Pemerintah Kabupaten / Kementerian"></div>
+      <div class="full"><label>Jabatan / Formasi</label><input id="fPosition" placeholder="Contoh: Pranata Komputer Ahli Pertama"></div>
+      <div><label>Pendidikan</label><input id="fEducation" placeholder="S1 Teknik Informatika"></div>
+      <div><label>Lokasi</label><input id="fLocation" placeholder="Kabupaten / Kota"></div>
+      <div><label>Jumlah Formasi</label><input id="fQuota" type="number" min="0" value="1"></div>
+      <div><label><input id="fPublished" type="checkbox" style="width:auto" checked> Publikasikan</label></div>
+    </div>
+    <button class="btn primary" onclick="addFormation()">Simpan Formasi</button><div id="formationMsg" class="notice"></div>
+   </div>
+   <div class="panel"><div class="panel-head"><h3>Daftar Formasi</h3><button class="btn" onclick="loadFormationsAdmin()">Muat ulang</button></div><div id="formationsList"></div></div>
+  </div>
   <div class="page" id="banners">
   <div class="panel">
     <div class="panel-head"><h3>🖼️ Kelola Banner</h3></div>
@@ -292,7 +317,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
     <div id="bannersList"></div>
   </div>
 </div>
-  <div class="page" id="premium"><div class="panel"><div class="panel-head"><div><h3>👑 Premium</h3><p class="muted">Kelola paket premium dan verifikasi pengajuan pembayaran.</p></div></div><div class="form-grid"><div><label>Nama Paket</label><input id="planName" placeholder="Premium 30 Hari"></div><div><label>Slug</label><input id="planSlug" placeholder="premium-30"></div><div><label>Harga</label><input id="planPrice" type="number" min="0" value="0"></div><div><label>Durasi (hari)</label><input id="planDays" type="number" min="1" value="30"></div><div class="full"><label>Deskripsi</label><input id="planDescription" placeholder="Akses materi dan tryout premium"></div></div><button class="btn primary" onclick="addPlan()">Tambah Paket</button><div id="planMsg" class="notice"></div></div><div class="panel"><h3>Daftar Paket</h3><div id="plansList"></div></div><div class="panel"><h3>Pengajuan Pembayaran</h3><div id="paymentsList"></div></div></div>
+  <div class="page" id="premium"><div class="panel"><div class="panel-head"><div><h3>👑 Premium</h3><p class="muted">Kelola paket premium dan verifikasi pengajuan pembayaran.</p></div></div><div class="form-grid"><div><label>Nama Paket</label><input id="planName" placeholder="Premium 30 Hari"></div><div><label>Slug</label><input id="planSlug" placeholder="premium-30"></div><div><label>Harga</label><input id="planPrice" type="number" min="0" value="100000"></div><div><label>Durasi (hari)</label><input id="planDays" type="number" min="1" value="30"></div><div class="full"><label>Deskripsi</label><input id="planDescription" placeholder="Akses materi dan tryout premium"></div></div><button class="btn primary" onclick="addPlan()">Tambah Paket</button><div id="planMsg" class="notice"></div></div><div class="panel"><h3>Daftar Paket</h3><div id="plansList"></div></div><div class="panel"><h3>Pengajuan Pembayaran</h3><div id="paymentsList"></div></div></div>
 <div class="page" id="notifications"><div class="panel"><div class="panel-head"><div><h3>🔔 Kirim Notifikasi</h3><p class="muted">Kirim pengumuman ke seluruh peserta.</p></div></div><div><label>Judul</label><input id="noticeTitle"></div><div><label>Pesan</label><textarea id="noticeMessage"></textarea></div><button class="btn primary" onclick="broadcastNotification()">Kirim ke Semua Peserta</button><div id="noticeMsg" class="notice"></div></div></div>
 <div class="page" id="users"><div class="panel"><div class="panel-head"><div><h3>👥 Pengguna</h3><p class="muted">Profil dan biodata peserta yang tersimpan.</p></div></div><div id="usersList"></div></div></div>
  </main>
@@ -551,6 +576,14 @@ window.addTryout=async function(){
   await loadPage('tryouts');
 };
 window.addTryout=window.addTryout;
+
+/* === ADMIN FORMATION MANAGEMENT === */
+function safeFormation(x){return String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+async function addFormation(){try{const y=Number(document.getElementById('fYear').value)||new Date().getFullYear(),agency=document.getElementById('fAgency').value.trim(),position=document.getElementById('fPosition').value.trim(),education=document.getElementById('fEducation').value.trim()||null,location=document.getElementById('fLocation').value.trim()||null,quota=Math.max(0,Number(document.getElementById('fQuota').value)||0),is_published=document.getElementById('fPublished').checked;if(!agency||!position)return msg('formationMsg','Instansi dan jabatan wajib diisi.','err');const {error}=await sb.from('formations').insert({year:y,agency,position,education,location,quota,is_published});if(error)throw error;msg('formationMsg','Formasi berhasil disimpan.','ok');document.getElementById('fAgency').value='';document.getElementById('fPosition').value='';document.getElementById('fEducation').value='';document.getElementById('fLocation').value='';document.getElementById('fQuota').value='1';await loadFormationsAdmin()}catch(e){msg('formationMsg',e.message||'Gagal menyimpan formasi.','err')}}
+async function loadFormationsAdmin(){const a=document.getElementById('formationsList');if(!a)return;a.innerHTML='<div class="empty">Memuat...</div>';try{const {data,error}=await sb.from('formations').select('id,year,agency,position,education,location,quota,is_published,created_at').order('year',{ascending:false}).order('created_at',{ascending:false});if(error)throw error;const rows=data||[];a.innerHTML=rows.length?`<div class="user-table-wrap"><table><thead><tr><th>Tahun</th><th>Instansi</th><th>Jabatan</th><th>Pendidikan</th><th>Lokasi</th><th>Formasi</th><th>Status</th><th></th></tr></thead><tbody>${rows.map(f=>`<tr><td>${f.year}</td><td>${safeFormation(f.agency)}</td><td><b>${safeFormation(f.position)}</b></td><td>${safeFormation(f.education||'-')}</td><td>${safeFormation(f.location||'-')}</td><td>${Number(f.quota||0).toLocaleString('id-ID')}</td><td>${f.is_published?'Aktif':'Draft'}</td><td><button class="btn danger" onclick="deleteFormation('${f.id}')">Hapus</button></td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">Belum ada data formasi.</div>'}catch(e){a.innerHTML='<div class="empty">'+safeFormation(e.message||e)+'</div>'}}
+async function deleteFormation(id){if(!confirm('Hapus formasi ini?'))return;const {error}=await sb.from('formations').delete().eq('id',id);if(error)return alert(error.message);await loadFormationsAdmin()}
+
+const _loadPageForFormation=window.loadPage;window.loadPage=async function(id){if(typeof _loadPageForFormation==='function')await _loadPageForFormation(id);if(id==='formations')await loadFormationsAdmin()};
 </script>
 </body>
 </html>
