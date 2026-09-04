@@ -185,6 +185,9 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
  .top{border-radius:18px!important}
 }
 
+
+/* profile-aware user table */
+.user-table-wrap{overflow:auto}.user-person{display:flex;align-items:center;gap:10px;min-width:190px}.user-person small{display:block;color:#7b8494;margin-top:3px}.user-mini-avatar,.user-mini-fallback{width:38px;height:38px;border-radius:50%;object-fit:cover}.user-mini-fallback{display:grid;place-items:center;background:linear-gradient(135deg,#6d5dfc,#ff7a66);color:#fff;font-weight:800}
 </style>
 </head>
 <body>
@@ -289,7 +292,7 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
     <div id="bannersList"></div>
   </div>
 </div>
-  <div class="page" id="users"><div class="panel"><h3>👥 Pengguna</h3><div id="usersList"></div></div></div>
+  <div class="page" id="users"><div class="panel"><div class="panel-head"><div><h3>👥 Pengguna</h3><p class="muted">Profil dan biodata peserta yang tersimpan.</p></div></div><div id="usersList"></div></div></div>
  </main>
 </section>
 
@@ -348,8 +351,14 @@ async function loadPage(id){
  if(id==='questions'){const {data}=await sb.from('questions').select('id,question_text,type,difficulty,question_year,created_at').order('created_at',{ascending:false}).limit(20);renderTable('questionsList',data,['type','difficulty','question_year','question_text'],true,'questions')}
  if(id==='materials'){const {data}=await sb.from('materials').select('id,title,is_published,is_premium,created_at').order('created_at',{ascending:false}).limit(20);renderTable('materialsList',data,['title','is_published','is_premium'],true,'materials')}
  if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
- if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderTable('usersList',data,['full_name','role','membership'],false,'')}
+ if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,avatar_url,phone,domicile,education,target_formasi,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderUserTable('usersList',data)}
 }
+function renderUserTable(target,data){
+ const el=document.getElementById(target);
+ if(!data?.length){el.innerHTML='<div class="empty">Belum ada data.</div>';return}
+ el.innerHTML='<div class="user-table-wrap"><table><thead><tr><th>Peserta</th><th>Kontak</th><th>Domisili</th><th>Pendidikan</th><th>Target Formasi</th><th>Status</th></tr></thead><tbody>'+data.map(r=>{const avatar=r.avatar_url?'<img class="user-mini-avatar" src="'+String(r.avatar_url).replace(/"/g,'&quot;')+'" alt="">':'<div class="user-mini-fallback">'+String((r.full_name||'P').charAt(0)).toUpperCase()+'</div>';return '<tr><td><div class="user-person">'+avatar+'<div><b>'+String(r.full_name||'Belum diisi')+'</b><small>'+String(r.role||'user')+'</small></div></div></td><td>'+String(r.phone||'-')+'</td><td>'+String(r.domicile||'-')+'</td><td>'+String(r.education||'-')+'</td><td>'+String(r.target_formasi||'-')+'</td><td><span class="chip">'+String(r.membership||'free')+'</span></td></tr>'}).join('')+'</tbody></table></div>'
+}
+
 function renderTable(target,data,cols,deletable,table){
  const el=document.getElementById(target);if(!data?.length){el.innerHTML='<div class="empty">Belum ada data.</div>';return}
  el.innerHTML='<table><thead><tr>'+cols.map(c=>'<th>'+c.replaceAll('_',' ')+'</th>').join('')+(deletable?'<th>Aksi</th>':'')+'</tr></thead><tbody>'+data.map(r=>'<tr>'+cols.map(c=>'<td>'+String(r[c]??'')+'</td>').join('')+(deletable?`<td><button class="btn danger" onclick="deleteRow('${table}','${r.id}')">Hapus</button></td>`:'')+'</tr>').join('')+'</tbody></table>';
