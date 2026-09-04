@@ -214,7 +214,11 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
 .category-option-icon{display:inline-flex}
 </style>
 
-</head>
+
+<style>
+.admin-nav-label{font-size:9px;letter-spacing:.14em;font-weight:900;color:#a5acb8;padding:4px 14px}.generator-hero{display:flex;justify-content:space-between;align-items:center;gap:20px;padding:22px 24px;border:1px solid #e8eaf0;border-radius:20px;background:linear-gradient(135deg,#fff,#f7f5ff);box-shadow:0 8px 26px rgba(40,44,63,.05);margin-bottom:16px}.generator-kicker{font-size:10px;font-weight:900;letter-spacing:.12em;color:#6a5ce8}.generator-hero h2{margin:7px 0 3px}.generator-hero p{margin:0;color:#768091;max-width:760px}.generator-badge{padding:9px 12px;border-radius:999px;background:#eeeaff;color:#5b4ccc;font-weight:900;font-size:10px;white-space:nowrap}.generator-panel{margin-top:0}.generator-actions{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:16px}.drill-admin-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}.admin-mode-card{display:grid;gap:4px;padding:14px 15px;border:1px solid #eceef3;border-radius:14px;background:#fcfcff;margin-top:9px}.admin-mode-card b{font-size:13px}.admin-mode-card span{font-size:12px;color:#7b8491}@media(max-width:900px){.drill-admin-grid{grid-template-columns:1fr}.generator-hero{align-items:flex-start;flex-direction:column}.generator-badge{align-self:flex-start}}
+</style>
+<style>.admin-list-card{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:14px 15px;border:1px solid #eceef3;border-radius:14px;background:#fff;margin-top:9px}.admin-list-card b{font-size:13px}.admin-coverage{display:grid;gap:8px;margin-top:10px}.coverage-row{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid #eef0f4;border-radius:12px;background:#fbfbfd}.coverage-row b{font-size:14px}.coverage-row small{color:#8a93a0}</style></head>
 <body>
 
 <section class="login" id="loginView">
@@ -235,7 +239,11 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
   <button class="navbtn" onclick="showPage('categories',this)">🗂️ <span>Kategori</span></button>
   <button class="navbtn" onclick="showPage('questions',this)">📝 <span>Bank Soal</span></button>
   <button class="navbtn" onclick="showPage('materials',this)">📚 <span>Materi</span></button>
-  <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout</span></button>
+   <div style="height:10px"></div><div class="admin-nav-label">LATIHAN</div>
+   <button class="navbtn" onclick="showPage('latsols',this)">✎ <span>Latsol</span></button>
+   <button class="navbtn" onclick="showPage('drilling',this)">◈ <span>Drilling</span></button>
+   <div class="admin-nav-label" style="margin-top:10px">SIMULASI</div>
+  <button class="navbtn" onclick="showPage('tryouts',this)">🏆 <span>Tryout Generator</span></button>
    <button class="navbtn" onclick="showPage('formations',this)">🧩 <span>Formasi CPNS</span></button>
   <button class="navbtn" onclick="showPage('live',this)">🔴 <span>Live Tryout</span></button>
   <button class="navbtn" onclick="showPage('banners',this)">🖼️ <span>Banner</span></button>
@@ -306,10 +314,26 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
   </div>
 
   <div class="page" id="tryouts">
-   <div class="panel"><h3>🏆 Buat Tryout</h3><div class="form-grid"><div><label>Judul</label><input id="tTitle"></div><div><label>Tipe</label><select id="tType"><option value="practice">Latihan</option><option value="regular">Regular</option><option value="live">Live</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div><label>Mulai Live (opsional)</label><input id="tStartsAt" type="datetime-local"></div><div><label>Selesai Live (opsional)</label><input id="tEndsAt" type="datetime-local"></div><div class="full"><label>Deskripsi</label><textarea id="tDescription"></textarea></div></div><button class="btn primary" onclick="addTryout()">Buat Tryout</button></div>
-   <div class="panel"><h3>Daftar Tryout</h3><div id="tryoutsList"></div></div>
+   <div class="generator-hero"><div><span class="generator-kicker">SIMULASI UJIAN</span><h2>Tryout Generator</h2><p>Buat tryout dari Bank Soal secara otomatis. Admin mengatur komposisi; sistem yang memilih soal secara random.</p></div><div class="generator-badge">RANDOM ENGINE</div></div>
+   <div class="panel generator-panel"><div class="panel-head"><div><h3>Konfigurasi Tryout</h3><p class="muted">Tidak perlu memilih soal satu per satu.</p></div></div>
+    <div class="form-grid"><div><label>Judul</label><input id="tTitle" placeholder="Tryout SKD #01"></div><div><label>Tipe</label><select id="tType"><option value="regular">Regular</option><option value="live">Live</option><option value="practice">Latihan</option></select></div><div><label>Durasi (menit)</label><input id="tDuration" type="number" value="100" min="1"></div><div><label>Status</label><select id="tStatus"><option value="draft">Draft</option><option value="scheduled">Scheduled</option><option value="published">Published</option></select></div><div><label>TWK</label><input id="tTwk" type="number" value="30" min="0"></div><div><label>TIU</label><input id="tTiu" type="number" value="35" min="0"></div><div><label>TKP</label><input id="tTkp" type="number" value="45" min="0"></div><div><label>Kesulitan</label><select id="tDifficulty"><option value="">Campuran</option><option value="easy">Mudah</option><option value="medium">Sedang</option><option value="hard">Sulit</option></select></div><div><label>Tahun Soal (opsional)</label><input id="tYear" type="number" min="2000" max="2100" placeholder="Semua tahun"></div><div><label><input type="checkbox" id="tPremium" style="width:auto"> Premium</label></div><div><label>Mulai Live (opsional)</label><input id="tStartsAt" type="datetime-local"></div><div><label>Selesai Live (opsional)</label><input id="tEndsAt" type="datetime-local"></div><div class="full"><label>Deskripsi</label><textarea id="tDescription" placeholder="Simulasi SKD dengan soal acak dari bank soal."></textarea></div></div>
+    <div class="generator-actions"><button class="btn primary" onclick="createAndGenerateTryout()">Generate Tryout →</button><span class="muted">Soal tersimpan sebagai snapshot di tryout.</span></div><div id="tryoutGenMsg" class="notice"></div>
+   </div>
+   <div class="panel"><div class="panel-head"><div><h3>Daftar Tryout</h3><p class="muted">Lihat jumlah soal dan generate ulang bila diperlukan.</p></div></div><div id="tryoutsList"></div></div>
   </div>
 
+  <div class="page" id="latsols">
+   <div class="generator-hero"><div><span class="generator-kicker">LATIHAN TERSTRUKTUR</span><h2>Latsol</h2><p>Buat katalog latihan dari Bank Soal tanpa memilih item soal manual.</p></div><div class="generator-badge">BANK → LATSOL</div></div>
+   <div class="panel"><div class="panel-head"><div><h3>Buat Paket Latsol</h3><p class="muted">Peserta akan mendapatkan soal random dari filter yang dipilih.</p></div></div>
+    <div class="form-grid"><div><label>Judul</label><input id="lTitle" placeholder="TIU — Tes Deret 2026"></div><div><label>Kategori</label><select id="lCategory"></select></div><div><label>Subkategori (opsional)</label><input id="lSubcategory" placeholder="Tes Deret"></div><div><label>Jumlah Soal</label><input id="lCount" type="number" value="10" min="1" max="100"></div><div><label>Durasi (menit)</label><input id="lDuration" type="number" value="20" min="1"></div><div><label>Akses</label><select id="lPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div><div><label>Status</label><select id="lPublished"><option value="true">Published</option><option value="false">Draft</option></select></div><div class="full"><label>Deskripsi</label><textarea id="lDescription" placeholder="Latihan soal terarah berdasarkan kategori."></textarea></div></div>
+    <button class="btn primary" onclick="addLatsolConfig()">Simpan Latsol</button><div id="latsolMsg" class="notice"></div>
+   </div>
+   <div class="panel"><div class="panel-head"><h3>Katalog Latsol</h3></div><div id="latsolsList"></div></div>
+  </div>
+  <div class="page" id="drilling">
+   <div class="generator-hero"><div><span class="generator-kicker">LATIHAN ADAPTIF</span><h2>Drilling</h2><p>Mesin drilling mengambil soal dari Bank Soal berdasarkan mode dan performa peserta.</p></div><div class="generator-badge">ADAPTIVE ENGINE</div></div>
+   <div class="drill-admin-grid"><div class="panel"><h3>Mode Drilling</h3><div class="admin-mode-card"><b>Latihan Bebas</b><span>Random dari kategori/subkategori yang dipilih.</span></div><div class="admin-mode-card"><b>Drilling Adaptif</b><span>Kesulitan menyesuaikan akurasi peserta.</span></div><div class="admin-mode-card"><b>Ulangi Salah</b><span>Memanggil soal yang pernah dijawab salah.</span></div><div class="admin-mode-card"><b>Drilling Kelemahan</b><span>Memprioritaskan subkategori dengan akurasi rendah.</span></div></div><div class="panel"><h3>Mastery</h3><p class="muted">Target penguasaan default: <b>80%</b></p><div id="drillingCoverage"></div></div></div>
+  </div>
   <div class="page" id="live"><div class="panel"><h3>🔴 Live Tryout</h3><p class="muted">Pilih tryout bertipe LIVE dan atur jadwalnya. Fitur ranking real-time akan kita sambungkan setelah alur peserta selesai.</p><div id="liveList"></div></div></div>
   <div class="page" id="formations">
    <div class="panel"><div class="panel-head"><div><h3>🧩 Kelola Formasi CPNS</h3><p class="muted">Tambahkan data formasi yang akan dibaca peserta melalui Web Publish.</p></div></div>
@@ -783,6 +807,65 @@ async function deleteFormation(id){if(!confirm('Hapus formasi ini?'))return;cons
 const _loadPageForFormation=window.loadPage;window.loadPage=async function(id){if(typeof _loadPageForFormation==='function')await _loadPageForFormation(id);if(id==='formations')await loadFormationsAdmin()};
 setupCategoryIconPicker();
 refreshLucideIcons();
+</script>
+
+<script>
+/* === SIAP ASN LEARNING ENGINE ADMIN V1 === */
+async function loadLatsolAdmin(){
+  const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name)').order('sort_order').order('created_at',{ascending:false});
+  const e=document.getElementById('latsolsList'); if(!e)return;
+  if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
+  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'Semua kategori')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';
+}
+async function addLatsolConfig(){
+  const p={title:lTitle.value.trim(),description:lDescription.value.trim()||null,category_id:lCategory.value||null,subcategory:lSubcategory.value.trim()||null,question_count:Math.min(100,Math.max(1,Number(lCount.value)||10)),duration_minutes:Math.max(1,Number(lDuration.value)||20),is_premium:lPremium.value==='true',is_published:lPublished.value==='true',sort_order:0};
+  if(!p.title)return msg('latsolMsg','Judul Latsol wajib diisi.','err');
+  const {error}=await sb.from('latsol_configs').insert(p); if(error)return msg('latsolMsg',error.message,'err');
+  msg('latsolMsg','Latsol berhasil dibuat.'); lTitle.value=lDescription.value=lSubcategory.value=''; lCount.value=10;lDuration.value=20;lPremium.value='false';lPublished.value='true'; await loadLatsolAdmin();
+}
+async function loadDrillingAdmin(){
+  const {data,error}=await sb.from('questions').select('category_id,subcategory').eq('is_active',true);
+  const e=document.getElementById('drillingCoverage');if(!e)return;if(error){e.textContent=safeAdmin(error.message);return}
+  const m=new Map();(data||[]).forEach(q=>{const k=q.category_id||'none';if(!m.has(k))m.set(k,{n:0,subs:new Set()});m.get(k).n++;if(q.subcategory)m.get(k).subs.add(q.subcategory)});
+  const cats=categories.map(c=>({c,n:m.get(c.id)?.n||0,s:m.get(c.id)?.subs?.size||0}));
+  e.innerHTML='<div class="admin-coverage">'+cats.map(x=>`<div class="coverage-row"><span>${safeAdmin(x.c.name)}</span><b>${x.n}</b><small>${x.s} subkategori</small></div>`).join('')+'</div>';
+}
+async function createAndGenerateTryout(){
+  const twk=Math.max(0,Number(tTwk.value)||0),tiu=Math.max(0,Number(tTiu.value)||0),tkp=Math.max(0,Number(tTkp.value)||0),total=twk+tiu+tkp;
+  if(total<=0)return msg('tryoutGenMsg','Jumlah soal harus lebih dari 0.','err');
+  if(!tTitle.value.trim())return msg('tryoutGenMsg','Judul tryout wajib diisi.','err');
+  if(tType.value==='live' && (!tStartsAt.value || !tEndsAt.value))return msg('tryoutGenMsg','Tryout Live harus memiliki waktu mulai dan selesai.','err');
+  const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Math.max(1,Number(tDuration.value)||100),is_premium:tPremium.checked,available_from:tStartsAt.value?new Date(tStartsAt.value).toISOString():null,available_until:tEndsAt.value?new Date(tEndsAt.value).toISOString():null};
+  const {data,error}=await sb.from('tryouts').insert(p).select('id').single();if(error)return msg('tryoutGenMsg',error.message,'err');
+  const {data:g,error:ge}=await sb.rpc('generate_tryout_random',{p_tryout_id:data.id,p_twk:twk,p_tiu:tiu,p_tkp:tkp,p_difficulty:tDifficulty.value||null,p_question_year:tYear.value?Number(tYear.value):null});
+  if(ge){await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',ge.message,'err');}
+  if(tType.value==='live'){
+    const {error:le}=await sb.from('live_sessions').upsert({tryout_id:data.id,starts_at:p.available_from,ends_at:p.available_until,ranking_visible:true},{onConflict:'tryout_id'});
+    if(le){await sb.from('tryout_questions').delete().eq('tryout_id',data.id);await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',le.message,'err');}
+  }
+  msg('tryoutGenMsg',`Tryout berhasil dibuat: ${total} soal random.`,'ok');await loadPage('tryouts');
+}
+const _loadPageBase=loadPage;
+loadPage=async function(id){
+  if(id==='latsols') await loadLatsolAdmin();
+  if(id==='drilling') await loadDrillingAdmin();
+  if(id==='tryouts'){
+    const {data,error}=await sb.from('tryouts').select('id,title,type,status,duration_minutes,is_premium,created_at').order('created_at',{ascending:false});
+    if(!error){
+      const counts={};
+      const ids=(data||[]).map(x=>x.id); if(ids.length){const {data:q}=await sb.from('tryout_questions').select('tryout_id');(q||[]).forEach(x=>counts[x.tryout_id]=(counts[x.tryout_id]||0)+1)}
+      const e=document.getElementById('tryoutsList');e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.type)} · ${safeAdmin(x.status)} · ${x.duration_minutes} menit · ${counts[x.id]||0} soal</div></div><div class="row-actions">${x.status!=='draft'?'<span class="chip">'+(x.is_premium?'Premium':'Gratis')+'</span>':''}<button class="btn" onclick="regenerateTryout(\''+x.id+'\')">Regenerate</button></div></div>`).join('')||'<div class="empty">Belum ada tryout.</div>';
+    } else await _loadPageBase(id);
+    return;
+  }
+  return _loadPageBase(id);
+};
+async function regenerateTryout(id){
+  const twk=30,tiu=35,tkp=45;
+  if(!confirm('Generate ulang tryout ini dengan komposisi 30 TWK / 35 TIU / 45 TKP? Soal lama akan diganti.'))return;
+  const {error}=await sb.rpc('generate_tryout_random',{p_tryout_id:id,p_twk:twk,p_tiu:tiu,p_tkp:tkp,p_difficulty:null,p_question_year:null});
+  if(error)alert(error.message);else{alert('Tryout berhasil di-generate ulang.');loadPage('tryouts')}
+}
 </script>
 </body>
 </html>
