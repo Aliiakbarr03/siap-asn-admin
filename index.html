@@ -188,6 +188,8 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
 
 /* profile-aware user table */
 .user-table-wrap{overflow:auto}.user-person{display:flex;align-items:center;gap:10px;min-width:190px}.user-person small{display:block;color:#7b8494;margin-top:3px}.user-mini-avatar,.user-mini-fallback{width:38px;height:38px;border-radius:50%;object-fit:cover}.user-mini-fallback{display:grid;place-items:center;background:linear-gradient(135deg,#6d5dfc,#ff7a66);color:#fff;font-weight:800}
+
+.hint{display:block;margin-top:6px;color:#7b8493;font-size:12px}
 </style>
 
 <style>
@@ -366,13 +368,11 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="panel-head"><h3>🖼️ Kelola Banner</h3></div>
     <p class="muted">Upload dan kelola banner yang akan tampil otomatis di Web Peserta.</p>
     <div class="form-grid">
-      <div><label>Judul Banner</label><input id="bannerTitle" placeholder="Contoh: Persiapan CPNS 2026"></div>
+      <div><label>Nama Banner (untuk Admin)</label><input id="bannerTitle" placeholder="Contoh: Banner CPNS September"></div>
       <div><label>Urutan Tampil</label><input id="bannerSort" type="number" min="1" value="1"></div>
-      <div class="full"><label>Subjudul (opsional)</label><input id="bannerSubtitle" placeholder="Contoh: Belajar lebih siap bersama SIAP ASN"></div>
-      <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="https://..."></div>
+            <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="latsols / materials / drilling / tryouts / premium / https://..."><small class="hint">Jika diisi, gambar banner bisa diklik untuk membuka tujuan.</small></div>
       <div><label>Posisi Banner</label><select id="bannerPlacement"><option value="hero">Banner Utama / Slideshow</option><option value="side">Banner Kecil Samping</option></select></div>
-      <div><label>Teks Tombol (opsional)</label><input id="bannerCta" placeholder="Contoh: Mulai Sekarang"></div>
-      <div class="full banner-upload-box">
+            <div class="full banner-upload-box">
         <label>Upload Gambar Banner</label>
         <div class="banner-spec"><b>Ukuran disarankan: 1920 × 600 px</b><br>Rasio: 16:5 • Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
         <input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewBannerFile(this)">
@@ -655,13 +655,13 @@ function previewBannerFile(input){
 
 function clearBannerForm(){
   document.getElementById('bannerTitle').value='';
-  document.getElementById('bannerSubtitle').value='';
+  if(document.getElementById('bannerSubtitle'))document.getElementById('bannerSubtitle').value='';
   document.getElementById('bannerLink').value='';
   document.getElementById('bannerSort').value='1';
   document.getElementById('bannerFile').value='';
   document.getElementById('bannerActive').checked=true;
   if(document.getElementById('bannerPlacement'))document.getElementById('bannerPlacement').value='hero';
-  if(document.getElementById('bannerCta'))document.getElementById('bannerCta').value='';
+  if(document.getElementById('bannerCta'))if(document.getElementById('bannerCta'))document.getElementById('bannerCta').value='';
   document.getElementById('bannerPreview').style.display='none';
   document.getElementById('bannerMsg').style.display='none';
 }
@@ -669,12 +669,12 @@ function clearBannerForm(){
 async function saveBanner(){
   const file=document.getElementById('bannerFile').files[0];
   const title=document.getElementById('bannerTitle').value.trim()||'Banner SIAP ASN';
-  const subtitle=document.getElementById('bannerSubtitle').value.trim()||null;
+  const subtitle=null;
   const link=document.getElementById('bannerLink').value.trim()||null;
   const sortOrder=Number(document.getElementById('bannerSort').value)||1;
   const isActive=document.getElementById('bannerActive').checked;
   const placement=document.getElementById('bannerPlacement')?.value||'hero';
-  const ctaLabel=document.getElementById('bannerCta')?.value.trim()||null;
+  const ctaLabel=null;
   const btn=document.getElementById('saveBannerBtn');
   const wrap=document.getElementById('bannerUploadProgress');
   const bar=document.getElementById('bannerUploadBar');
