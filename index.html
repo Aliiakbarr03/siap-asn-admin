@@ -338,7 +338,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="bulk-box" style="margin-top:16px"><div class="bulk-help"><b>Format sama seperti Bank Soal.</b> Satu baris = satu soal. Subkategori boleh berbeda per baris. Minimal: Pertanyaan, Opsi A-D, Jawaban Benar.</div><input id="bulkLatsolFile" class="bulk-file" type="file" accept=".csv,.xlsx,.xls" onchange="handleLatsolBulkFile(this)"><div id="bulkLatsolSummary" class="bulk-summary"></div><div id="bulkLatsolPreview" class="bulk-preview"></div><div class="import-progress" id="bulkLatsolProgress"><div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px"><button id="bulkLatsolImportBtn" class="btn primary" type="button" disabled onclick="importLatsolPackage()">Import Paket Latsol</button></div></div>
     <div id="latsolMsg" class="notice"></div>
    </div>
-   <div class="panel"><div class="panel-head"><h3>Katalog Latsol</h3><button class="btn" onclick="loadLatsolAdmin()">Muat ulang</button></div><div id="latsolsList"></div></div>
+   <div class="panel"><div class="panel-head"><div><h3>Katalog Latsol</h3><p class="muted">Status paket dan performa peserta dibaca langsung dari Supabase.</p></div><button class="btn" onclick="loadLatsolAdmin()">Muat ulang</button></div><div id="latsolAdminSummary" class="admin-coverage"></div><div id="latsolsList"></div></div>
   </div>
 
   <div class="page" id="drilling">
@@ -823,9 +823,33 @@ refreshLucideIcons();
 <script>
 /* === SIAP ASN LEARNING ENGINE ADMIN V2 === */
 async function loadLatsolAdmin(){
-  const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name,icon)').order('sort_order').order('created_at',{ascending:false});
-  const e=document.getElementById('latsolsList');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
-  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
+  const e=document.getElementById('latsolsList');
+  const summary=document.getElementById('latsolAdminSummary');
+  if(!e)return;
+  e.innerHTML='<div class="empty">Memuat katalog Latsol...</div>';
+  try{
+    const {data,error}=await sb.rpc('get_latsol_catalog_v2');
+    if(error)throw error;
+    const rows=data||[];
+    const total=rows.length;
+    const published=rows.filter(x=>x.is_published).length;
+    const premium=rows.filter(x=>x.is_premium).length;
+    const attempts=rows.reduce((n,x)=>n+Number(x.attempts||0),0);
+    if(summary)summary.innerHTML=`
+      <div class="coverage-row"><span>Total Paket</span><b>${total}</b><small>Semua paket published</small></div>
+      <div class="coverage-row"><span>Gratis</span><b>${Math.max(0,total-premium)}</b><small>Akses reguler</small></div>
+      <div class="coverage-row"><span>Premium</span><b>${premium}</b><small>Memerlukan membership</small></div>
+      <div class="coverage-row"><span>Total Dikerjakan</span><b>${attempts}</b><small>Riwayat peserta</small></div>`;
+    e.innerHTML=rows.map(x=>{
+      const status=x.is_premium?'Premium':'Gratis';
+      const perf=Number(x.attempts||0)>0?` · ${Number(x.attempts||0)}x dikerjakan · Best ${Number(x.best_score||0)}%`:' · Belum dikerjakan peserta';
+      return `<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.category_icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.category_name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${Number(x.question_count||0)} soal · ${Number(x.duration_minutes||0)} menit${perf}</div></div><div class="row-actions"><span class="chip">${status}</span><span class="chip">${x.has_access?'Akses OK':'Terkunci reguler'}</span></div></div>`;
+    }).join('')||'<div class="empty">Belum ada paket Latsol published. Buat paket dari panel di atas lalu pilih status Published.</div>';
+    refreshLucideIcons();
+  }catch(err){
+    if(summary)summary.innerHTML='';
+    e.innerHTML='<div class="empty">Gagal memuat katalog Latsol: '+safeAdmin(err.message||'Terjadi kesalahan.')+'</div>';
+  }
 }
 const latsolBulkState={rows:[],valid:0,invalid:0};
 function validateLatsolRows(rows){
