@@ -849,8 +849,29 @@ refreshLucideIcons();
 async function loadLatsolAdmin(){
   const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name,icon)').order('sort_order').order('created_at',{ascending:false});
   const e=document.getElementById('latsolsList');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
-  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
+  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><div class="row-actions"><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span><button class="btn danger" type="button" onclick="deleteLatsolPackage('${x.id}')">Hapus</button></div></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
 }
+async function deleteLatsolPackage(id){
+  if(!id)return;
+  if(!confirm('Hapus paket Latsol ini beserta data soal yang terkait? Tindakan ini tidak bisa dibatalkan.'))return;
+  try{
+    // Menggunakan RPC khusus bila tersedia agar penghapusan paket dan soal tetap atomik.
+    let rpcError=null;
+    const rpcResult=await sb.rpc('delete_latsol_package',{p_latsol_id:id});
+    rpcError=rpcResult.error;
+    if(rpcError){
+      // Kompatibilitas dengan database lama yang belum memiliki RPC khusus.
+      const {error}=await sb.from('latsol_configs').delete().eq('id',id);
+      if(error)throw error;
+    }
+    msg('latsolMsg','Paket Latsol berhasil dihapus.','ok');
+    await loadLatsolAdmin();
+  }catch(e){
+    console.error('Delete Latsol failed:',e);
+    msg('latsolMsg','Gagal menghapus paket Latsol: '+(e?.message||'Terjadi kesalahan.'),'err');
+  }
+}
+
 const latsolBulkState={rows:[],valid:0,invalid:0,parsed:false};
 function validateLatsolRows(rows){
   const out=[];let valid=0,invalid=0;
