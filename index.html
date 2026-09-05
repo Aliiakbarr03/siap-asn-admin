@@ -323,13 +323,24 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
   </div>
 
   <div class="page" id="latsols">
-   <div class="generator-hero"><div><span class="generator-kicker">LATIHAN TERSTRUKTUR</span><h2>Latsol</h2><p>Buat katalog latihan dari Bank Soal tanpa memilih item soal manual.</p></div><div class="generator-badge">BANK → LATSOL</div></div>
-   <div class="panel"><div class="panel-head"><div><h3>Buat Paket Latsol</h3><p class="muted">Peserta akan mendapatkan soal random dari filter yang dipilih.</p></div></div>
-    <div class="form-grid"><div><label>Judul</label><input id="lTitle" placeholder="TIU — Tes Deret 2026"></div><div><label>Kategori</label><select id="lCategory"></select></div><div><label>Subkategori (opsional)</label><input id="lSubcategory" placeholder="Tes Deret"></div><div><label>Jumlah Soal</label><input id="lCount" type="number" value="10" min="1" max="100"></div><div><label>Durasi (menit)</label><input id="lDuration" type="number" value="20" min="1"></div><div><label>Akses</label><select id="lPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div><div><label>Status</label><select id="lPublished"><option value="true">Published</option><option value="false">Draft</option></select></div><div class="full"><label>Deskripsi</label><textarea id="lDescription" placeholder="Latihan soal terarah berdasarkan kategori."></textarea></div></div>
-    <button class="btn primary" onclick="addLatsolConfig()">Simpan Latsol</button><div id="latsolMsg" class="notice"></div>
+   <div class="generator-hero"><div><span class="generator-kicker">LATIHAN TERSTRUKTUR</span><h2>Latsol</h2><p>Buat paket latihan dari file Excel/CSV. Soal yang diimpor tetap masuk ke Bank Soal dan ditautkan ke paket Latsol.</p></div><div class="generator-badge">EXCEL → LATSOL</div></div>
+   <div class="panel">
+    <div class="panel-head"><div><h3>Buat Paket Latsol</h3><p class="muted">Pilih satu dari 3 kategori utama, siapkan metadata paket, lalu upload banyak soal.</p></div><div class="bulk-actions"><button class="btn" type="button" onclick="downloadLatsolTemplate('xlsx')">Template Excel</button><button class="btn" type="button" onclick="downloadLatsolTemplate('csv')">Template CSV</button></div></div>
+    <div class="form-grid">
+     <div><label>Judul Paket</label><input id="lTitle" placeholder="TWK — Nasionalisme 2026"></div>
+     <div><label>Kategori</label><select id="lCategory"><option value="">Pilih kategori...</option></select></div>
+     <div><label>Subkategori Default (opsional)</label><input id="lSubcategory" placeholder="Nasionalisme"></div>
+     <div><label>Durasi (menit)</label><input id="lDuration" type="number" value="20" min="1"></div>
+     <div><label>Akses</label><select id="lPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div>
+     <div><label>Status</label><select id="lPublished"><option value="true">Published</option><option value="false">Draft</option></select></div>
+     <div class="full"><label>Deskripsi</label><textarea id="lDescription" placeholder="Latihan soal terarah berdasarkan kategori dan subkategori."></textarea></div>
+    </div>
+    <div class="bulk-box" style="margin-top:16px"><div class="bulk-help"><b>Format sama seperti Bank Soal.</b> Satu baris = satu soal. Subkategori boleh berbeda per baris. Minimal: Pertanyaan, Opsi A-D, Jawaban Benar.</div><input id="bulkLatsolFile" class="bulk-file" type="file" accept=".csv,.xlsx,.xls" onchange="handleLatsolBulkFile(this)"><div id="bulkLatsolSummary" class="bulk-summary"></div><div id="bulkLatsolPreview" class="bulk-preview"></div><div class="import-progress" id="bulkLatsolProgress"><div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px"><button id="bulkLatsolImportBtn" class="btn primary" type="button" disabled onclick="importLatsolPackage()">Import Paket Latsol</button></div></div>
+    <div id="latsolMsg" class="notice"></div>
    </div>
-   <div class="panel"><div class="panel-head"><h3>Katalog Latsol</h3></div><div id="latsolsList"></div></div>
+   <div class="panel"><div class="panel-head"><h3>Katalog Latsol</h3><button class="btn" onclick="loadLatsolAdmin()">Muat ulang</button></div><div id="latsolsList"></div></div>
   </div>
+
   <div class="page" id="drilling">
    <div class="generator-hero"><div><span class="generator-kicker">LATIHAN ADAPTIF</span><h2>Drilling</h2><p>Mesin drilling mengambil soal dari Bank Soal berdasarkan mode dan performa peserta.</p></div><div class="generator-badge">ADAPTIVE ENGINE</div></div>
    <div class="drill-admin-grid"><div class="panel"><h3>Mode Drilling</h3><div class="admin-mode-card"><b>Latihan Bebas</b><span>Random dari kategori/subkategori yang dipilih.</span></div><div class="admin-mode-card"><b>Drilling Adaptif</b><span>Kesulitan menyesuaikan akurasi peserta.</span></div><div class="admin-mode-card"><b>Ulangi Salah</b><span>Memanggil soal yang pernah dijawab salah.</span></div><div class="admin-mode-card"><b>Drilling Kelemahan</b><span>Memprioritaskan subkategori dengan akurasi rendah.</span></div></div><div class="panel"><h3>Mastery</h3><p class="muted">Target penguasaan default: <b>80%</b></p><div id="drillingCoverage"></div></div></div>
@@ -484,7 +495,7 @@ async function addCategory(){
  await loadCategories();
  loadPage('categories');
 }
-async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory','bulkQuestionDefaultCategory','bulkMaterialDefaultCategory']){const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Pilih kategori...</option>'+categories.map(c=>`<option value="${c.id}">${ICON_KEYS.has(String(c.icon||''))?'◈ ':((c.icon||'')+' ')}${c.name}</option>`).join('')}renderSubcategoryHints()}
+async function loadCategories(){const {data}=await sb.from('categories').select('*').order('sort_order');categories=data||[];for(const id of ['qCategory','mCategory','lCategory','bulkQuestionDefaultCategory','bulkMaterialDefaultCategory']){const el=document.getElementById(id);if(el)el.innerHTML='<option value="">Pilih kategori...</option>'+categories.map(c=>`<option value="${c.id}">${ICON_KEYS.has(String(c.icon||''))?'◈ ':((c.icon||'')+' ')}${c.name}</option>`).join('')}renderSubcategoryHints()}
 async function loadPage(id){
  if(id==='categories'){const {data}=await sb.from('categories').select('id,name,slug,icon,sort_order,is_active').order('sort_order');renderTable('categoriesList',data,['name','slug','icon','sort_order','is_active'],true,'categories')}
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
@@ -810,62 +821,42 @@ refreshLucideIcons();
 </script>
 
 <script>
-/* === SIAP ASN LEARNING ENGINE ADMIN V1 === */
+/* === SIAP ASN LEARNING ENGINE ADMIN V2 === */
 async function loadLatsolAdmin(){
-  const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name)').order('sort_order').order('created_at',{ascending:false});
-  const e=document.getElementById('latsolsList'); if(!e)return;
-  if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
-  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'Semua kategori')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';
+  const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name,icon)').order('sort_order').order('created_at',{ascending:false});
+  const e=document.getElementById('latsolsList');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
+  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
 }
-async function addLatsolConfig(){
-  const p={title:lTitle.value.trim(),description:lDescription.value.trim()||null,category_id:lCategory.value||null,subcategory:lSubcategory.value.trim()||null,question_count:Math.min(100,Math.max(1,Number(lCount.value)||10)),duration_minutes:Math.max(1,Number(lDuration.value)||20),is_premium:lPremium.value==='true',is_published:lPublished.value==='true',sort_order:0};
-  if(!p.title)return msg('latsolMsg','Judul Latsol wajib diisi.','err');
-  const {error}=await sb.from('latsol_configs').insert(p); if(error)return msg('latsolMsg',error.message,'err');
-  msg('latsolMsg','Latsol berhasil dibuat.'); lTitle.value=lDescription.value=lSubcategory.value=''; lCount.value=10;lDuration.value=20;lPremium.value='false';lPublished.value='true'; await loadLatsolAdmin();
+const latsolBulkState={rows:[],valid:0,invalid:0};
+function validateLatsolRows(rows){
+  const out=[];let valid=0,invalid=0;const catId=document.getElementById('lCategory')?.value||'',cat=categories.find(c=>String(c.id)===String(catId)),defaultSub=cleanCell(document.getElementById('lSubcategory')?.value||''),expectedType=normalizeType(cat?.slug||cat?.name||'');
+  for(const raw of (rows||[])){const r={...raw,error:''};r.subcategory=cleanCell(raw.subcategory)||defaultSub;r.type=normalizeType(raw.type||expectedType||'other');r.difficulty=normalizeDifficulty(raw.difficulty)||'medium';r.correct_answer=cleanCell(raw.correct_answer).toUpperCase();
+    if(!r.question_text||!r.option_a||!r.option_b||!r.option_c||!r.option_d)r.error='Pertanyaan dan Opsi A-D wajib diisi.';
+    if(!['A','B','C','D','E'].includes(r.correct_answer))r.error=r.error||'Jawaban benar harus A/B/C/D/E.';
+    if(r.correct_answer==='E'&&!r.option_e)r.error=r.error||'Opsi E wajib diisi jika jawaban E.';
+    if(expectedType!=='other'&&r.type!==expectedType)r.error=r.error||`Jenis soal harus ${expectedType.toUpperCase()} untuk kategori ${cat?.name||'ini'}.`;
+    if(r.question_year&&(!Number.isInteger(Number(r.question_year))||Number(r.question_year)<2000||Number(r.question_year)>2100))r.error=r.error||'Tahun soal tidak valid.';
+    if(r.error)invalid++;else valid++;out.push(r);
+  }return {rows:out,valid,invalid};
 }
-async function loadDrillingAdmin(){
-  const {data,error}=await sb.from('questions').select('category_id,subcategory').eq('is_active',true);
-  const e=document.getElementById('drillingCoverage');if(!e)return;if(error){e.textContent=safeAdmin(error.message);return}
-  const m=new Map();(data||[]).forEach(q=>{const k=q.category_id||'none';if(!m.has(k))m.set(k,{n:0,subs:new Set()});m.get(k).n++;if(q.subcategory)m.get(k).subs.add(q.subcategory)});
-  const cats=categories.map(c=>({c,n:m.get(c.id)?.n||0,s:m.get(c.id)?.subs?.size||0}));
-  e.innerHTML='<div class="admin-coverage">'+cats.map(x=>`<div class="coverage-row"><span>${safeAdmin(x.c.name)}</span><b>${x.n}</b><small>${x.s} subkategori</small></div>`).join('')+'</div>';
+async function handleLatsolBulkFile(input){
+  const sum=document.getElementById('bulkLatsolSummary'),pre=document.getElementById('bulkLatsolPreview'),btn=document.getElementById('bulkLatsolImportBtn');sum.innerHTML='<span class="bulk-pill">Membaca file...</span>';pre.innerHTML='';btn.disabled=true;
+  if(!document.getElementById('lCategory')?.value){sum.innerHTML='<span class="bulk-pill bad">Pilih kategori terlebih dahulu.</span>';return}
+  const result=await parseBulkFile('questions',input.files?.[0]);if(result.error){sum.innerHTML='<span class="bulk-pill bad">'+safeAdmin(result.error)+'</span>';return}
+  Object.assign(latsolBulkState,validateLatsolRows(result.rows));sum.innerHTML=`<span class="bulk-pill">Total ${latsolBulkState.rows.length}</span><span class="bulk-pill ok">Siap ${latsolBulkState.valid}</span><span class="bulk-pill bad">Perlu diperbaiki ${latsolBulkState.invalid}</span>`;
+  const cols=['subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error'];pre.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c.replaceAll('_',' ')}</th>`).join('')+'</tr></thead><tbody>'+latsolBulkState.rows.slice(0,100).map(r=>'<tr>'+cols.map(c=>`<td>${safeAdmin(r[c]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>'+(latsolBulkState.rows.length>100?'<div class="bulk-help" style="padding:10px">Menampilkan 100 baris pertama untuk preview.</div>':'');btn.disabled=!(latsolBulkState.valid>0&&latsolBulkState.invalid===0);
 }
-async function createAndGenerateTryout(){
-  const twk=Math.max(0,Number(tTwk.value)||0),tiu=Math.max(0,Number(tTiu.value)||0),tkp=Math.max(0,Number(tTkp.value)||0),total=twk+tiu+tkp;
-  if(total<=0)return msg('tryoutGenMsg','Jumlah soal harus lebih dari 0.','err');
-  if(!tTitle.value.trim())return msg('tryoutGenMsg','Judul tryout wajib diisi.','err');
-  if(tType.value==='live' && (!tStartsAt.value || !tEndsAt.value))return msg('tryoutGenMsg','Tryout Live harus memiliki waktu mulai dan selesai.','err');
-  const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Math.max(1,Number(tDuration.value)||100),is_premium:tPremium.checked,available_from:tStartsAt.value?new Date(tStartsAt.value).toISOString():null,available_until:tEndsAt.value?new Date(tEndsAt.value).toISOString():null};
-  const {data,error}=await sb.from('tryouts').insert(p).select('id').single();if(error)return msg('tryoutGenMsg',error.message,'err');
-  const {data:g,error:ge}=await sb.rpc('generate_tryout_random',{p_tryout_id:data.id,p_twk:twk,p_tiu:tiu,p_tkp:tkp,p_difficulty:tDifficulty.value||null,p_question_year:tYear.value?Number(tYear.value):null});
-  if(ge){await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',ge.message,'err');}
-  if(tType.value==='live'){
-    const {error:le}=await sb.from('live_sessions').upsert({tryout_id:data.id,starts_at:p.available_from,ends_at:p.available_until,ranking_visible:true},{onConflict:'tryout_id'});
-    if(le){await sb.from('tryout_questions').delete().eq('tryout_id',data.id);await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',le.message,'err');}
-  }
-  msg('tryoutGenMsg',`Tryout berhasil dibuat: ${total} soal random.`,'ok');await loadPage('tryouts');
+async function importLatsolPackage(){
+  if(!latsolBulkState.valid||latsolBulkState.invalid)return;const catId=document.getElementById('lCategory')?.value||'';if(!catId)return msg('latsolMsg','Kategori wajib dipilih.','err');const payload=latsolBulkState.rows.filter(r=>!r.error).map(r=>({subcategory:r.subcategory||null,type:r.type,question_text:r.question_text.trim(),question_image_url:r.question_image_url||null,option_a:r.option_a.trim(),option_b:r.option_b.trim(),option_c:r.option_c.trim(),option_d:r.option_d.trim(),option_e:r.option_e?.trim()||null,correct_answer:r.correct_answer,explanation:r.explanation?.trim()||null,difficulty:r.difficulty||'medium',question_year:r.question_year?Number(r.question_year):null}));const btn=document.getElementById('bulkLatsolImportBtn');btn.disabled=true;btn.textContent='Mengimpor paket...';
+  try{const {error}=await sb.rpc('create_latsol_with_questions',{p_title:document.getElementById('lTitle').value.trim(),p_description:document.getElementById('lDescription').value.trim()||null,p_category_id:catId,p_subcategory:document.getElementById('lSubcategory').value.trim()||null,p_duration_minutes:Number(document.getElementById('lDuration').value)||20,p_is_premium:document.getElementById('lPremium').value==='true',p_is_published:document.getElementById('lPublished').value==='true',p_rows:payload});if(error)throw error;msg('latsolMsg',`Paket Latsol berhasil dibuat dengan ${payload.length} soal.`,'ok');document.getElementById('bulkLatsolFile').value='';document.getElementById('lTitle').value='';document.getElementById('lDescription').value='';document.getElementById('lSubcategory').value='';latsolBulkState.rows=[];latsolBulkState.valid=0;latsolBulkState.invalid=0;document.getElementById('bulkLatsolSummary').innerHTML='';document.getElementById('bulkLatsolPreview').innerHTML='';await loadLatsolAdmin()}catch(e){msg('latsolMsg',e.message||'Import paket Latsol gagal.','err')}finally{btn.disabled=false;btn.textContent='Import Paket Latsol'}
 }
-const _loadPageBase=loadPage;
-loadPage=async function(id){
-  if(id==='latsols') await loadLatsolAdmin();
-  if(id==='drilling') await loadDrillingAdmin();
-  if(id==='tryouts'){
-    const {data,error}=await sb.from('tryouts').select('id,title,type,status,duration_minutes,is_premium,created_at').order('created_at',{ascending:false});
-    if(!error){
-      const counts={};
-      const ids=(data||[]).map(x=>x.id); if(ids.length){const {data:q}=await sb.from('tryout_questions').select('tryout_id');(q||[]).forEach(x=>counts[x.tryout_id]=(counts[x.tryout_id]||0)+1)}
-      const e=document.getElementById('tryoutsList');e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.type)} · ${safeAdmin(x.status)} · ${x.duration_minutes} menit · ${counts[x.id]||0} soal</div></div><div class="row-actions">${x.status!=='draft'?'<span class="chip">'+(x.is_premium?'Premium':'Gratis')+'</span>':''}<button class="btn" onclick="regenerateTryout(\''+x.id+'\')">Regenerate</button></div></div>`).join('')||'<div class="empty">Belum ada tryout.</div>';
-    } else await _loadPageBase(id);
-    return;
-  }
-  return _loadPageBase(id);
-};
-async function regenerateTryout(id){
-  const twk=30,tiu=35,tkp=45;
-  if(!confirm('Generate ulang tryout ini dengan komposisi 30 TWK / 35 TIU / 45 TKP? Soal lama akan diganti.'))return;
-  const {error}=await sb.rpc('generate_tryout_random',{p_tryout_id:id,p_twk:twk,p_tiu:tiu,p_tkp:tkp,p_difficulty:null,p_question_year:null});
-  if(error)alert(error.message);else{alert('Tryout berhasil di-generate ulang.');loadPage('tryouts')}
-}
+function addLatsolConfig(){return importLatsolPackage()}
+function downloadLatsolTemplate(format){const data=[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:''}];const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Latsol');if(format==='csv'){const csv=XLSX.utils.sheet_to_csv(ws),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='template-latsol-siap-asn.csv';a.click();URL.revokeObjectURL(a.href)}else XLSX.writeFile(wb,'template-latsol-siap-asn.xlsx')}
+async function loadDrillingAdmin(){const {data,error}=await sb.rpc('get_drill_stats');const e=document.getElementById('drillingCoverage');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}const s=Array.isArray(data)?data[0]:data;e.innerHTML=`<div class="admin-coverage"><div class="coverage-row"><span>Model</span><b>Latsol → Drilling</b><small>Drilling hanya mengukur hasil Latsol</small></div><div class="coverage-row"><span>Sesi Latsol</span><b>${Number(s?.total_sessions||0)}</b><small>30 hari</small></div><div class="coverage-row"><span>Akurasi</span><b>${Number(s?.average_accuracy||0)}%</b><small>rata-rata</small></div></div>`}
+
+async function createAndGenerateTryout(){const twk=Math.max(0,Number(document.getElementById('tTwk').value)||0),tiu=Math.max(0,Number(document.getElementById('tTiu').value)||0),tkp=Math.max(0,Number(document.getElementById('tTkp').value)||0),total=twk+tiu+tkp;if(total<=0)return msg('tryoutGenMsg','Jumlah soal harus lebih dari 0.','err');if(!document.getElementById('tTitle').value.trim())return msg('tryoutGenMsg','Judul tryout wajib diisi.','err');if(document.getElementById('tType').value==='live'&&(!document.getElementById('tStartsAt').value||!document.getElementById('tEndsAt').value))return msg('tryoutGenMsg','Tryout Live harus memiliki waktu mulai dan selesai.','err');const p={title:document.getElementById('tTitle').value.trim(),description:document.getElementById('tDescription').value.trim()||null,type:document.getElementById('tType').value,status:document.getElementById('tStatus').value,duration_minutes:Math.max(1,Number(document.getElementById('tDuration').value)||100),is_premium:document.getElementById('tPremium').checked,available_from:document.getElementById('tStartsAt').value?new Date(document.getElementById('tStartsAt').value).toISOString():null,available_until:document.getElementById('tEndsAt').value?new Date(document.getElementById('tEndsAt').value).toISOString():null};const {data,error}=await sb.from('tryouts').insert(p).select('id').single();if(error)return msg('tryoutGenMsg',error.message,'err');const {error:ge}=await sb.rpc('generate_tryout_random',{p_tryout_id:data.id,p_twk:twk,p_tiu:tiu,p_tkp:tkp,p_difficulty:document.getElementById('tDifficulty').value||null,p_question_year:document.getElementById('tYear').value?Number(document.getElementById('tYear').value):null});if(ge){await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',ge.message,'err')}if(document.getElementById('tType').value==='live'){const {error:le}=await sb.from('live_sessions').upsert({tryout_id:data.id,starts_at:p.available_from,ends_at:p.available_until,ranking_visible:true},{onConflict:'tryout_id'});if(le){await sb.from('tryout_questions').delete().eq('tryout_id',data.id);await sb.from('tryouts').delete().eq('id',data.id);return msg('tryoutGenMsg',le.message,'err')}}msg('tryoutGenMsg',`Tryout berhasil dibuat: ${total} soal random.`,'ok');await loadPage('tryouts')}
+
+const _loadPageBaseFinal=loadPage;loadPage=async function(id){if(id==='latsols')await loadLatsolAdmin();if(id==='drilling')await loadDrillingAdmin();if(id==='tryouts'){const {data,error}=await sb.from('tryouts').select('id,title,type,status,duration_minutes,is_premium,created_at').order('created_at',{ascending:false});if(!error){const counts={};const ids=(data||[]).map(x=>x.id);if(ids.length){const {data:q}=await sb.from('tryout_questions').select('tryout_id');(q||[]).forEach(x=>counts[x.tryout_id]=(counts[x.tryout_id]||0)+1)}const e=document.getElementById('tryoutsList');if(e)e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.type)} · ${safeAdmin(x.status)} · ${x.duration_minutes} menit · ${counts[x.id]||0} soal</div></div><div class="row-actions"><span class="chip">${x.is_premium?'Premium':'Gratis'}</span><button class="btn" onclick="regenerateTryout('${x.id}')">Regenerate</button></div></div>`).join('')||'<div class="empty">Belum ada tryout.</div>';return}}return _loadPageBaseFinal(id)};
+async function regenerateTryout(id){if(!confirm('Generate ulang tryout ini dengan komposisi 30 TWK / 35 TIU / 45 TKP? Soal lama akan diganti.'))return;const {error}=await sb.rpc('generate_tryout_random',{p_tryout_id:id,p_twk:30,p_tiu:35,p_tkp:45,p_difficulty:null,p_question_year:null});if(error)alert(error.message);else{alert('Tryout berhasil di-generate ulang.');await loadPage('tryouts')}}
 </script>
-</body>
 </html>
