@@ -188,8 +188,6 @@ td,th{border-color:#eef0f3!important;color:#202124!important}
 
 /* profile-aware user table */
 .user-table-wrap{overflow:auto}.user-person{display:flex;align-items:center;gap:10px;min-width:190px}.user-person small{display:block;color:#7b8494;margin-top:3px}.user-mini-avatar,.user-mini-fallback{width:38px;height:38px;border-radius:50%;object-fit:cover}.user-mini-fallback{display:grid;place-items:center;background:linear-gradient(135deg,#6d5dfc,#ff7a66);color:#fff;font-weight:800}
-
-.hint{display:block;margin-top:6px;color:#7b8493;font-size:12px}
 </style>
 
 <style>
@@ -249,7 +247,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
    <button class="navbtn" onclick="showPage('formations',this)">🧩 <span>Formasi CPNS</span></button>
   <button class="navbtn" onclick="showPage('live',this)">🔴 <span>Live Tryout</span></button>
   <button class="navbtn" onclick="showPage('banners',this)">🖼️ <span>Banner</span></button>
-  <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button><button class="navbtn" onclick="showPage('premium',this)">👑 <span>Premium</span></button><button class="navbtn" onclick="showPage('notifications',this)">🔔 <span>Notifikasi</span></button>
+  <button class="navbtn" onclick="showPage('users',this)">👥 <span>User</span></button><button class="navbtn" onclick="showPage('premium',this)">👑 <span>Premium</span></button><button class="navbtn" onclick="showPage('announcements',this)">📣 <span>Aktivitas</span></button><button class="navbtn" onclick="showPage('notifications',this)">🔔 <span>Notifikasi</span></button>
  </aside>
  <main class="main">
   <div class="top"><div><h1 id="pageTitle">Dashboard</h1><div class="muted">Pusat kontrol SIAP ASN</div></div><div class="userbox"><span id="adminName"></span><button class="btn ghost" onclick="logout()">Keluar</button></div></div>
@@ -368,11 +366,11 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="panel-head"><h3>🖼️ Kelola Banner</h3></div>
     <p class="muted">Upload dan kelola banner yang akan tampil otomatis di Web Peserta.</p>
     <div class="form-grid">
-      <div><label>Nama Banner (untuk Admin)</label><input id="bannerTitle" placeholder="Contoh: Banner CPNS September"></div>
+      <div><label>Judul Banner</label><input id="bannerTitle" placeholder="Contoh: Persiapan CPNS 2026"></div>
       <div><label>Urutan Tampil</label><input id="bannerSort" type="number" min="1" value="1"></div>
-            <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="latsols / materials / drilling / tryouts / premium / https://..."><small class="hint">Jika diisi, gambar banner bisa diklik untuk membuka tujuan.</small></div>
-      <div><label>Posisi Banner</label><select id="bannerPlacement"><option value="hero">Banner Utama / Slideshow</option><option value="side">Banner Kecil Samping</option></select></div>
-            <div class="full banner-upload-box">
+      <div class="full"><label>Subjudul (opsional)</label><input id="bannerSubtitle" placeholder="Contoh: Belajar lebih siap bersama SIAP ASN"></div>
+      <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="https://..."></div>
+      <div class="full banner-upload-box">
         <label>Upload Gambar Banner</label>
         <div class="banner-spec"><b>Ukuran disarankan: 1920 × 600 px</b><br>Rasio: 16:5 • Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
         <input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewBannerFile(this)">
@@ -393,6 +391,25 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
   </div>
 </div>
   <div class="page" id="premium"><div class="panel"><div class="panel-head"><div><h3>👑 Premium</h3><p class="muted">Kelola paket premium dan verifikasi pengajuan pembayaran.</p></div></div><div class="form-grid"><div><label>Nama Paket</label><input id="planName" placeholder="Premium 30 Hari"></div><div><label>Slug</label><input id="planSlug" placeholder="premium-30"></div><div><label>Harga</label><input id="planPrice" type="number" min="0" value="100000"></div><div><label>Durasi (hari)</label><input id="planDays" type="number" min="1" value="30"></div><div class="full"><label>Deskripsi</label><input id="planDescription" placeholder="Akses materi dan tryout premium"></div></div><button class="btn primary" onclick="addPlan()">Tambah Paket</button><div id="planMsg" class="notice"></div></div><div class="panel"><h3>Daftar Paket</h3><div id="plansList"></div></div><div class="panel"><h3>Pengajuan Pembayaran</h3><div id="paymentsList"></div></div></div>
+
+<div class="page" id="announcements">
+  <div class="panel">
+    <div class="panel-head"><div><h3>📣 Aktivitas & Pengumuman</h3><p class="muted">Konten di sini langsung tampil pada menu Aktivitas web peserta.</p></div></div>
+    <div class="form-grid">
+      <div><label>Judul</label><input id="announcementTitle" placeholder="Contoh: Update Terbaru"></div>
+      <div><label>Kategori</label><select id="announcementCategory"><option value="information">Informasi</option><option value="system">Update Sistem</option><option value="quiz">Kuisioner</option><option value="payment">Pembayaran</option></select></div>
+      <div class="full"><label>Isi Pengumuman</label><textarea id="announcementContent" placeholder="Tulis isi pengumuman..."></textarea></div>
+      <div><label>Mulai Tayang (opsional)</label><input id="announcementStartsAt" type="datetime-local"></div>
+      <div><label>Selesai Tayang (opsional)</label><input id="announcementEndsAt" type="datetime-local"></div>
+      <div><label>Status</label><select id="announcementActive"><option value="true">Aktif</option><option value="false">Nonaktif</option></select></div>
+      <div><label>Badge Baru</label><select id="announcementNew"><option value="true">Tampilkan NEW</option><option value="false">Tanpa NEW</option></select></div>
+    </div>
+    <div class="row-actions" style="margin-top:14px"><button class="btn primary" onclick="saveAnnouncement()">Simpan Pengumuman</button><button class="btn" onclick="resetAnnouncementForm()">Batal Edit</button></div>
+    <div id="announcementMsg" class="notice"></div>
+  </div>
+  <div class="panel"><div class="panel-head"><div><h3>Daftar Aktivitas</h3><p class="muted">Edit atau hapus pengumuman yang sudah dibuat.</p></div></div><div id="announcementsList"></div></div>
+</div>
+
 <div class="page" id="notifications"><div class="panel"><div class="panel-head"><div><h3>🔔 Kirim Notifikasi</h3><p class="muted">Kirim pengumuman ke seluruh peserta.</p></div></div><div><label>Judul</label><input id="noticeTitle"></div><div><label>Pesan</label><textarea id="noticeMessage"></textarea></div><button class="btn primary" onclick="broadcastNotification()">Kirim ke Semua Peserta</button><div id="noticeMsg" class="notice"></div></div></div>
 <div class="page" id="users"><div class="panel"><div class="panel-head"><div><h3>👥 Pengguna</h3><p class="muted">Profil dan biodata peserta yang tersimpan.</p></div></div><div id="usersList"></div></div></div>
  </main>
@@ -655,13 +672,11 @@ function previewBannerFile(input){
 
 function clearBannerForm(){
   document.getElementById('bannerTitle').value='';
-  if(document.getElementById('bannerSubtitle'))document.getElementById('bannerSubtitle').value='';
+  document.getElementById('bannerSubtitle').value='';
   document.getElementById('bannerLink').value='';
   document.getElementById('bannerSort').value='1';
   document.getElementById('bannerFile').value='';
   document.getElementById('bannerActive').checked=true;
-  if(document.getElementById('bannerPlacement'))document.getElementById('bannerPlacement').value='hero';
-  if(document.getElementById('bannerCta'))if(document.getElementById('bannerCta'))document.getElementById('bannerCta').value='';
   document.getElementById('bannerPreview').style.display='none';
   document.getElementById('bannerMsg').style.display='none';
 }
@@ -669,12 +684,10 @@ function clearBannerForm(){
 async function saveBanner(){
   const file=document.getElementById('bannerFile').files[0];
   const title=document.getElementById('bannerTitle').value.trim()||'Banner SIAP ASN';
-  const subtitle=null;
+  const subtitle=document.getElementById('bannerSubtitle').value.trim()||null;
   const link=document.getElementById('bannerLink').value.trim()||null;
   const sortOrder=Number(document.getElementById('bannerSort').value)||1;
   const isActive=document.getElementById('bannerActive').checked;
-  const placement=document.getElementById('bannerPlacement')?.value||'hero';
-  const ctaLabel=null;
   const btn=document.getElementById('saveBannerBtn');
   const wrap=document.getElementById('bannerUploadProgress');
   const bar=document.getElementById('bannerUploadBar');
@@ -707,9 +720,7 @@ async function saveBanner(){
       image_url:publicUrl,
       action_url:link,
       sort_order:sortOrder,
-      is_active:isActive,
-      placement:placement,
-      cta_label:ctaLabel
+      is_active:isActive
     });
     if(result.error)throw result.error;
 
@@ -757,7 +768,7 @@ async function loadBanners(){
 
       const meta=document.createElement('div');
       meta.className='muted';
-      meta.textContent=((b.placement==='side')?'Banner Kecil Samping':'Banner Utama / Slideshow')+' • Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
+      meta.textContent='Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
 
       const del=document.createElement('button');
       del.type='button';
