@@ -368,11 +368,12 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="form-grid">
       <div><label>Judul Banner</label><input id="bannerTitle" placeholder="Contoh: Persiapan CPNS 2026"></div>
       <div><label>Urutan Tampil</label><input id="bannerSort" type="number" min="1" value="1"></div>
+      <div><label>Posisi Banner</label><select id="bannerPlacement"><option value="hero">Banner Utama / Slideshow</option><option value="side">Banner Kecil Samping</option></select><small class="muted">Pilih slot tampilan di Beranda peserta.</small></div>
       <div class="full"><label>Subjudul (opsional)</label><input id="bannerSubtitle" placeholder="Contoh: Belajar lebih siap bersama SIAP ASN"></div>
       <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="https://..."></div>
       <div class="full banner-upload-box">
         <label>Upload Gambar Banner</label>
-        <div class="banner-spec"><b>Ukuran disarankan: 1920 × 600 px</b><br>Rasio: 16:5 • Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
+        <div class="banner-spec"><b>Ukuran disarankan: Banner utama 1920 × 900 px • Banner samping 800 × 400 px</b><br>Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
         <input id="bannerFile" type="file" accept="image/jpeg,image/png,image/webp" onchange="previewBannerFile(this)">
         <img id="bannerPreview" class="banner-preview" alt="Preview banner">
         <div id="bannerUploadProgress" class="upload-progress"><div id="bannerUploadBar"></div></div>
@@ -671,6 +672,7 @@ function previewBannerFile(input){
 }
 
 function clearBannerForm(){
+  if(document.getElementById('bannerPlacement'))document.getElementById('bannerPlacement').value='hero';
   document.getElementById('bannerTitle').value='';
   document.getElementById('bannerSubtitle').value='';
   document.getElementById('bannerLink').value='';
@@ -688,6 +690,7 @@ async function saveBanner(){
   const link=document.getElementById('bannerLink').value.trim()||null;
   const sortOrder=Number(document.getElementById('bannerSort').value)||1;
   const isActive=document.getElementById('bannerActive').checked;
+  const placement=document.getElementById('bannerPlacement')?.value||'hero';
   const btn=document.getElementById('saveBannerBtn');
   const wrap=document.getElementById('bannerUploadProgress');
   const bar=document.getElementById('bannerUploadBar');
@@ -720,7 +723,8 @@ async function saveBanner(){
       image_url:publicUrl,
       action_url:link,
       sort_order:sortOrder,
-      is_active:isActive
+      is_active:isActive,
+      placement:placement
     });
     if(result.error)throw result.error;
 
@@ -768,7 +772,8 @@ async function loadBanners(){
 
       const meta=document.createElement('div');
       meta.className='muted';
-      meta.textContent='Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
+      const placementLabel=b.placement==='side'?'Banner Samping':'Banner Utama';
+      meta.textContent=placementLabel+' • Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
 
       const del=document.createElement('button');
       del.type='button';
