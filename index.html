@@ -853,22 +853,15 @@ async function loadLatsolAdmin(){
 }
 async function deleteLatsolPackage(id){
   if(!id)return;
-  if(!confirm('Hapus paket Latsol ini beserta data soal yang terkait? Tindakan ini tidak bisa dibatalkan.'))return;
+  if(!confirm('Hapus paket Latsol ini beserta SEMUA soal paket tersebut dari Bank Soal? Riwayat latihan yang terkait juga akan dihapus. Tindakan ini tidak bisa dibatalkan.'))return;
   try{
-    // Menggunakan RPC khusus bila tersedia agar penghapusan paket dan soal tetap atomik.
-    let rpcError=null;
-    const rpcResult=await sb.rpc('delete_latsol_package',{p_latsol_id:id});
-    rpcError=rpcResult.error;
-    if(rpcError){
-      // Kompatibilitas dengan database lama yang belum memiliki RPC khusus.
-      const {error}=await sb.from('latsol_configs').delete().eq('id',id);
-      if(error)throw error;
-    }
-    msg('latsolMsg','Paket Latsol berhasil dihapus.','ok');
+    const {error}=await sb.rpc('delete_latsol_package',{p_latsol_id:id});
+    if(error)throw error;
+    msg('latsolMsg','Paket Latsol dan soal terkait di Bank Soal berhasil dihapus.','ok');
     await loadLatsolAdmin();
   }catch(e){
     console.error('Delete Latsol failed:',e);
-    msg('latsolMsg','Gagal menghapus paket Latsol: '+(e?.message||'Terjadi kesalahan.'),'err');
+    msg('latsolMsg','Gagal menghapus paket Latsol dan soal terkait: '+(e?.message||'Terjadi kesalahan.'),'err');
   }
 }
 
