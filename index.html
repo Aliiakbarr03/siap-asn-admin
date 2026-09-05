@@ -301,14 +301,14 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
 
   <div class="page" id="materials">
    <div class="bulk-box">
-    <div class="bulk-head"><div><h3>Upload Banyak Materi</h3><div class="bulk-help">Upload CSV/Excel untuk memasukkan banyak materi sekaligus. Satu baris = satu materi. Cocok untuk membuat katalog materi TWK, TIU, TKP beserta submaterinya.</div></div><div class="bulk-actions"><button class="btn" type="button" onclick="downloadBulkTemplate('materials','xlsx')">Template Excel</button><button class="btn" type="button" onclick="downloadBulkTemplate('materials','csv')">Template CSV</button></div></div>
+    <div class="bulk-head"><div><h3>Upload Banyak Materi</h3><div class="bulk-help">Upload CSV/Excel untuk memasukkan banyak materi sekaligus. Satu baris = satu materi. Sistem hanya mengizinkan materi yang memiliki Judul dan Isi Materi agar Web Peserta tidak menampilkan materi kosong.</div></div><div class="bulk-actions"><button class="btn" type="button" onclick="downloadBulkTemplate('materials','xlsx')">Template Excel</button><button class="btn" type="button" onclick="downloadBulkTemplate('materials','csv')">Template CSV</button></div></div>
     <input id="bulkMaterialFile" class="bulk-file" type="file" accept=".csv,.xlsx,.xls" onchange="handleBulkFile('materials',this)">
     <div class="bulk-map"><div><label>Default Kategori (jika kolom file kosong)</label><select id="bulkMaterialDefaultCategory"></select></div><div><label>Status publikasi</label><select id="bulkMaterialPublished"><option value="true">Publikasikan</option><option value="false">Simpan sebagai draft</option></select></div><div><label>Akses</label><select id="bulkMaterialPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div></div>
     <div id="bulkMaterialSummary" class="bulk-summary"></div><div id="bulkMaterialPreview" class="bulk-preview"></div>
     <div class="import-progress" id="bulkMaterialProgress"><div></div></div>
     <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px"><button id="bulkMaterialImportBtn" class="btn primary" type="button" disabled onclick="importBulkMaterials()">Import Materi</button></div>
    </div>
-   <div class="panel"><div class="panel-head"><h3>Tambah Materi Manual</h3></div><div class="form-grid"><div><label>Kategori</label><select id="mCategory"></select></div><div><label>Subkategori</label><input id="mSubcategory" class="subcat-input" list="materialSubcategoryList" placeholder="Contoh: Pancasila"></div><div><label>Judul</label><input id="mTitle"></div><div><label>Urutan</label><input id="mSort" type="number" min="0" value="0"></div><div class="full"><label>Ringkasan</label><input id="mSummary"></div><div class="full"><label>Isi Materi</label><textarea id="mContent"></textarea></div><div><label><input type="checkbox" id="mPremium" style="width:auto"> Premium</label></div><div><label><input type="checkbox" id="mPublished" style="width:auto" checked> Publikasikan</label></div><div class="full"><label>URL Cover (opsional)</label><input id="mCover" placeholder="https://..."></div></div><button class="btn primary" onclick="addMaterial()">Simpan Materi</button><div id="mMsg" class="notice"></div></div>
+   <div class="panel"><div class="panel-head"><h3>Tambah Materi Manual</h3></div><div class="form-grid"><div><label>Kategori</label><select id="mCategory"></select></div><div><label>Subkategori</label><input id="mSubcategory" class="subcat-input" list="materialSubcategoryList" placeholder="Contoh: Pancasila"></div><div><label>Judul</label><input id="mTitle"></div><div><label>Urutan</label><input id="mSort" type="number" min="0" value="0"></div><div class="full"><label>Ringkasan</label><input id="mSummary"></div><div class="full"><label>Isi Materi</label><textarea id="mContent" placeholder="Tulis isi materi lengkap di sini. Gunakan Enter untuk paragraf baru."></textarea><div class="bulk-help">Wajib diisi. Isi ini yang akan dibaca peserta di Web Publish.</div></div><div><label><input type="checkbox" id="mPremium" style="width:auto"> Premium</label></div><div><label><input type="checkbox" id="mPublished" style="width:auto" checked> Publikasikan</label></div><div class="full"><label>URL Cover (opsional)</label><input id="mCover" placeholder="https://..."></div></div><button class="btn primary" onclick="addMaterial()">Simpan Materi</button><div id="mMsg" class="notice"></div></div>
    <datalist id="materialSubcategoryList"></datalist>
    <div class="panel"><h3>Daftar Materi</h3><div id="materialsList"></div></div>
   </div>
@@ -520,7 +520,7 @@ async function loadPage(id){
  if(id==='categories'){const {data}=await sb.from('categories').select('id,name,slug,icon,sort_order,is_active').order('sort_order');renderTable('categoriesList',data,['name','slug','icon','sort_order','is_active'],true,'categories')}
  if(id==='dashboard'){const [u,q,m,t]=await Promise.all(['profiles','questions','materials','tryouts'].map(x=>sb.from(x).select('*',{count:'exact',head:true})));document.getElementById('statUsers').textContent=u.count||0;document.getElementById('statQuestions').textContent=q.count||0;document.getElementById('statMaterials').textContent=m.count||0;document.getElementById('statTryouts').textContent=t.count||0}
  if(id==='questions'){const {data,error}=await sb.from('questions').select('id,question_text,type,difficulty,question_year,subcategory,is_active,created_at,categories(name)').order('created_at',{ascending:false}).limit(50);if(error){document.getElementById('questionsList').innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}renderQuestionsAdmin(data||[])}
- if(id==='materials'){const {data,error}=await sb.from('materials').select('id,title,subcategory,is_published,is_premium,created_at,categories(name)').order('created_at',{ascending:false}).limit(50);if(error){document.getElementById('materialsList').innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}renderMaterialsAdmin(data||[])}
+ if(id==='materials'){const {data,error}=await sb.from('materials').select('id,title,summary,content,subcategory,is_published,is_premium,created_at,categories(name)').order('created_at',{ascending:false}).limit(50);if(error){document.getElementById('materialsList').innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}renderMaterialsAdmin(data||[])}
  if(id==='tryouts'||id==='live'){const {data}=await sb.from('tryouts').select('*').order('created_at',{ascending:false});if(id==='tryouts')renderTable('tryoutsList',data,['title','type','status','duration_minutes'],true,'tryouts');else renderTable('liveList',(data||[]).filter(x=>x.type==='live'),['title','status','duration_minutes'],false,'')}
  if(id==='users'){const {data}=await sb.from('profiles').select('id,full_name,avatar_url,phone,domicile,education,target_formasi,role,membership,created_at').order('created_at',{ascending:false}).limit(100);renderUserTable('usersList',data)}
 }
@@ -540,7 +540,20 @@ async function addQuestion(){
  if(!payload.question_text||!payload.option_a||!payload.option_b||!payload.option_c||!payload.option_d)return msg('qMsg','Pertanyaan dan opsi A-D wajib diisi.','err');
  const {error}=await sb.from('questions').insert(payload);if(error)return msg('qMsg',error.message,'err');msg('qMsg','Soal berhasil disimpan.');['qText','qA','qB','qC','qD','qE','qExplain','qImage','qSubcategory'].forEach(id=>document.getElementById(id).value='');loadPage('questions');
 }
-async function addMaterial(){const p={category_id:mCategory.value||null,subcategory:mSubcategory.value.trim()||null,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim()||null,cover_url:mCover.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked,sort_order:Number(mSort.value)||0};if(!p.title)return msg('mMsg','Judul wajib diisi','err');const {error}=await sb.from('materials').insert(p);if(error)return msg('mMsg',error.message,'err');msg('mMsg','Materi berhasil disimpan.','ok');['mTitle','mSummary','mContent','mCover','mSubcategory'].forEach(id=>document.getElementById(id).value='');loadPage('materials')}
+function isPlaceholderMaterialContent(value){
+ const s=cleanCell(value).toLowerCase().replace(/\s+/g,' ');
+ return !s||['isi materi lengkap...','isi materi lengkap','contoh isi materi','tulis isi materi di sini','-'].includes(s);
+}
+async function addMaterial(){
+ const p={category_id:mCategory.value||null,subcategory:mSubcategory.value.trim()||null,title:mTitle.value.trim(),summary:mSummary.value.trim()||null,content:mContent.value.trim(),cover_url:mCover.value.trim()||null,is_premium:mPremium.checked,is_published:mPublished.checked,sort_order:Number(mSort.value)||0};
+ if(!p.title)return msg('mMsg','Judul wajib diisi.','err');
+ if(isPlaceholderMaterialContent(p.content))return msg('mMsg','Isi Materi wajib diisi dengan materi lengkap. Teks contoh/placeholder tidak bisa dipublikasikan.','err');
+ const {error}=await sb.from('materials').insert(p);
+ if(error)return msg('mMsg',error.message,'err');
+ msg('mMsg','✓ Materi berhasil disimpan dan isi materi ikut tersimpan ke Supabase.','ok');
+ ['mTitle','mSummary','mContent','mCover','mSubcategory'].forEach(id=>document.getElementById(id).value='');
+ await loadPage('materials');
+}
 async function addTryout(){const p={title:tTitle.value.trim(),description:tDescription.value.trim()||null,type:tType.value,status:tStatus.value,duration_minutes:Number(tDuration.value)||100};if(!p.title)return alert('Judul wajib diisi');const {error}=await sb.from('tryouts').insert(p);if(error)return alert(error.message);tTitle.value=tDescription.value='';loadPage('tryouts')}
 
 
@@ -585,7 +598,9 @@ function validateBulk(kind,rows){
      if(r.question_year&&(!Number.isInteger(Number(r.question_year))||Number(r.question_year)<2000||Number(r.question_year)>2100))base.error=base.error||'Tahun soal tidak valid.';
    }else{
      if(!r.title)base.error=base.error||'Judul materi wajib diisi.';
+     if(isPlaceholderMaterialContent(r.content))base.error=base.error||'Isi Materi wajib diisi dan tidak boleh berupa teks contoh/placeholder.';
    }
+   if(kind==='materials'){base.content_status=isPlaceholderMaterialContent(r.content)?'KOSONG':'✓ '+cleanCell(r.content).length+' karakter'}
    if(base.error)invalid++;else valid++;out.push(base);
  });
  return {rows:out,valid,invalid};
@@ -606,7 +621,7 @@ function renderBulkPreview(kind,state){
  const sum=document.getElementById(kind==='questions'?'bulkQuestionSummary':'bulkMaterialSummary'),pre=document.getElementById(kind==='questions'?'bulkQuestionPreview':'bulkMaterialPreview'),btn=document.getElementById(kind==='questions'?'bulkQuestionImportBtn':'bulkMaterialImportBtn');
  sum.innerHTML=`<span class="bulk-pill">Total ${state.rows.length}</span><span class="bulk-pill ok">Siap ${state.valid}</span><span class="bulk-pill bad">Perlu diperbaiki ${state.invalid}</span>`;
  if(!state.rows.length){pre.innerHTML='';btn.disabled=true;return}
- const cols=kind==='questions'?['category_name','subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error']:['category_name','subcategory','title','summary','is_premium','is_published','error'];
+ const cols=kind==='questions'?['category_name','subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error']:['category_name','subcategory','title','summary','content_status','is_premium','is_published','error'];
  pre.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c.replaceAll('_',' ')}</th>`).join('')+'</tr></thead><tbody>'+state.rows.slice(0,100).map(r=>'<tr>'+cols.map(c=>`<td>${safeAdmin(r[c]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>'+(state.rows.length>100?'<div class="bulk-help" style="padding:10px">Menampilkan 100 baris pertama untuk preview.</div>':'');
  btn.disabled=state.valid===0||state.invalid>0;
 }
@@ -627,11 +642,11 @@ async function importBulkQuestions(){
  try{await importRowsInChunks('questions',rows,'bulkQuestionProgress');alert(rows.length+' soal berhasil diimpor.');document.getElementById('bulkQuestionFile').value='';bulkState.questions={rows:[],valid:0,invalid:0};renderBulkPreview('questions',bulkState.questions);await loadPage('questions')}catch(e){alert('Import soal berhenti: '+(e.message||e))}finally{btn.disabled=false;btn.textContent='Import Soal'}}
 async function importBulkMaterials(){
  const state=bulkState.materials;if(!state.valid||state.invalid)return;
- const rows=state.rows.filter(r=>!r.error).map(r=>({category_id:r.category_id,subcategory:r.subcategory||null,title:r.title,summary:r.summary||null,content:r.content||null,cover_url:r.cover_url||null,is_premium:r.is_premium!==''?boolCell(r.is_premium,false):document.getElementById('bulkMaterialPremium').value==='true',is_published:r.is_published!==''?boolCell(r.is_published,true):document.getElementById('bulkMaterialPublished').value==='true',sort_order:r.sort_order?Number(r.sort_order)||0:0}));
+ const rows=state.rows.filter(r=>!r.error).map(r=>({category_id:r.category_id,subcategory:r.subcategory||null,title:r.title,summary:r.summary||null,content:cleanCell(r.content),cover_url:r.cover_url||null,is_premium:r.is_premium!==''?boolCell(r.is_premium,false):document.getElementById('bulkMaterialPremium').value==='true',is_published:r.is_published!==''?boolCell(r.is_published,true):document.getElementById('bulkMaterialPublished').value==='true',sort_order:r.sort_order?Number(r.sort_order)||0:0}));
  const btn=document.getElementById('bulkMaterialImportBtn');btn.disabled=true;btn.textContent='Mengimpor...';
  try{await importRowsInChunks('materials',rows,'bulkMaterialProgress');alert(rows.length+' materi berhasil diimpor.');document.getElementById('bulkMaterialFile').value='';bulkState.materials={rows:[],valid:0,invalid:0};renderBulkPreview('materials',bulkState.materials);await loadPage('materials')}catch(e){alert('Import materi berhenti: '+(e.message||e))}finally{btn.disabled=false;btn.textContent='Import Materi'}}
 function downloadBulkTemplate(kind,format){
- const data=kind==='questions'?[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:'',Aktif:'true'}]:[{Kategori:'TWK',Subkategori:'Pancasila',Judul:'Contoh Materi Pancasila',Ringkasan:'Ringkasan singkat',Isi_Materi:'Isi materi lengkap...',URL_Cover:'',Premium:'false',Publikasi:'true',Urutan:'0'}];
+ const data=kind==='questions'?[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:'',Aktif:'true'}]:[{Kategori:'TWK',Subkategori:'Pancasila',Judul:'Contoh Materi Pancasila',Ringkasan:'Ringkasan singkat',Isi_Materi:'Pendahuluan Pancasila\n\nPancasila merupakan dasar negara Indonesia dan menjadi pedoman dalam kehidupan berbangsa dan bernegara.\n\nMateri dapat ditulis dalam beberapa paragraf seperti ini.',URL_Cover:'',Premium:'false',Publikasi:'true',Urutan:'0'}];
  const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,kind==='questions'?'Bank Soal':'Materi');
  if(format==='csv'){const csv=XLSX.utils.sheet_to_csv(ws);const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=kind==='questions'?'template-bank-soal-siap-asn.csv':'template-materi-siap-asn.csv';a.click();URL.revokeObjectURL(a.href)}
  else XLSX.writeFile(wb,kind==='questions'?'template-bank-soal-siap-asn.xlsx':'template-materi-siap-asn.xlsx');
@@ -643,7 +658,7 @@ function renderQuestionsAdmin(rows){
 }
 function renderMaterialsAdmin(rows){
  const el=document.getElementById('materialsList');if(!rows.length){el.innerHTML='<div class="empty">Belum ada materi.</div>';return}
- el.innerHTML='<div class="user-table-wrap"><table><thead><tr><th>Kategori</th><th>Subkategori</th><th>Judul</th><th>Status</th><th>Akses</th><th>Aksi</th></tr></thead><tbody>'+rows.map(r=>`<tr><td>${safeAdmin(r.categories?.name||'-')}</td><td>${safeAdmin(r.subcategory||'-')}</td><td><b>${safeAdmin(r.title)}</b></td><td>${r.is_published?'Publik':'Draft'}</td><td>${r.is_premium?'Premium':'Gratis'}</td><td><button class="btn danger" onclick="deleteRow('materials','${r.id}')">Hapus</button></td></tr>`).join('')+'</tbody></table></div>';
+ el.innerHTML='<div class="user-table-wrap"><table><thead><tr><th>Kategori</th><th>Subkategori</th><th>Judul</th><th>Isi Materi</th><th>Status</th><th>Akses</th><th>Aksi</th></tr></thead><tbody>'+rows.map(r=>{const ready=!isPlaceholderMaterialContent(r.content);return `<tr><td>${safeAdmin(r.categories?.name||'-')}</td><td>${safeAdmin(r.subcategory||'-')}</td><td><b>${safeAdmin(r.title)}</b></td><td>${ready?'✓ Siap dibaca':'⚠ Belum lengkap'}</td><td>${r.is_published?'Publik':'Draft'}</td><td>${r.is_premium?'Premium':'Gratis'}</td><td><button class="btn danger" onclick="deleteRow('materials','${r.id}')">Hapus</button></td></tr>`}).join('')+'</tbody></table></div>';
  renderSubcategoryHints(rows.map(r=>r.subcategory));
 }
 function renderSubcategoryHints(extra=[]){
