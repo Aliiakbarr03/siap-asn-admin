@@ -328,7 +328,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="panel-head"><div><h3>Buat Paket Latsol</h3><p class="muted">Pilih satu dari 3 kategori utama, siapkan metadata paket, lalu upload banyak soal.</p></div><div class="bulk-actions"><button class="btn" type="button" onclick="downloadLatsolTemplate('xlsx')">Template Excel</button><button class="btn" type="button" onclick="downloadLatsolTemplate('csv')">Template CSV</button></div></div>
     <div class="form-grid">
      <div><label>Judul Paket</label><input id="lTitle" placeholder="TWK — Nasionalisme 2026"></div>
-     <div><label>Kategori</label><select id="lCategory"><option value="">Pilih kategori...</option></select></div>
+     <div><label>Kategori</label><select id="lCategory" onchange="revalidateLatsolBulk()"><option value="">Pilih kategori...</option></select></div>
      <div><label>Subkategori Default (opsional)</label><input id="lSubcategory" placeholder="Nasionalisme"></div>
      <div><label>Durasi (menit)</label><input id="lDuration" type="number" value="20" min="1"></div>
      <div><label>Akses</label><select id="lPremium"><option value="false">Gratis</option><option value="true">Premium</option></select></div>
@@ -851,28 +851,117 @@ async function loadLatsolAdmin(){
   const e=document.getElementById('latsolsList');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
   e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
 }
-const latsolBulkState={rows:[],valid:0,invalid:0};
+const latsolBulkState={rows:[],valid:0,invalid:0,parsed:false};
 function validateLatsolRows(rows){
-  const out=[];let valid=0,invalid=0;const catId=document.getElementById('lCategory')?.value||'',cat=categories.find(c=>String(c.id)===String(catId)),defaultSub=cleanCell(document.getElementById('lSubcategory')?.value||''),expectedType=normalizeType(cat?.slug||cat?.name||'');
-  for(const raw of (rows||[])){const r={...raw,error:''};r.subcategory=cleanCell(raw.subcategory)||defaultSub;r.type=normalizeType(raw.type||expectedType||'other');r.difficulty=normalizeDifficulty(raw.difficulty)||'medium';r.correct_answer=cleanCell(raw.correct_answer).toUpperCase();
-    if(!r.question_text||!r.option_a||!r.option_b||!r.option_c||!r.option_d)r.error='Pertanyaan dan Opsi A-D wajib diisi.';
+  const out=[];let valid=0,invalid=0;
+  const catId=document.getElementById('lCategory')?.value||'';
+  const cat=categories.find(c=>String(c.id)===String(catId));
+  const defaultSub=cleanCell(document.getElementById('lSubcategory')?.value||'');
+  const expectedType=normalizeType(cat?.slug||cat?.name||'');
+  for(const raw of (rows||[])){
+    const r={...raw,error:''};
+    r.subcategory=cleanCell(raw.subcategory)||defaultSub;
+    r.type=normalizeType(raw.type||expectedType||'other');
+    r.difficulty=normalizeDifficulty(raw.difficulty)||'medium';
+    r.correct_answer=cleanCell(raw.correct_answer).toUpperCase();
+    if(!catId)r.error='Pilih kategori Latsol terlebih dahulu.';
+    if(!r.question_text||!r.option_a||!r.option_b||!r.option_c||!r.option_d)r.error=r.error||'Pertanyaan dan Opsi A-D wajib diisi.';
     if(!['A','B','C','D','E'].includes(r.correct_answer))r.error=r.error||'Jawaban benar harus A/B/C/D/E.';
     if(r.correct_answer==='E'&&!r.option_e)r.error=r.error||'Opsi E wajib diisi jika jawaban E.';
     if(expectedType!=='other'&&r.type!==expectedType)r.error=r.error||`Jenis soal harus ${expectedType.toUpperCase()} untuk kategori ${cat?.name||'ini'}.`;
     if(r.question_year&&(!Number.isInteger(Number(r.question_year))||Number(r.question_year)<2000||Number(r.question_year)>2100))r.error=r.error||'Tahun soal tidak valid.';
-    if(r.error)invalid++;else valid++;out.push(r);
-  }return {rows:out,valid,invalid};
+    if(r.error)invalid++;else valid++;
+    out.push(r);
+  }
+  return {rows:out,valid,invalid};
+}
+function renderLatsolBulkState(){
+  const sum=document.getElementById('bulkLatsolSummary'),pre=document.getElementById('bulkLatsolPreview'),btn=document.getElementById('bulkLatsolImportBtn');
+  if(!sum||!pre||!btn)return;
+  sum.innerHTML=`<span class="bulk-pill">Total ${latsolBulkState.rows.length}</span><span class="bulk-pill ok">Siap ${latsolBulkState.valid}</span><span class="bulk-pill bad">Perlu diperbaiki ${latsolBulkState.invalid}</span>`;
+  const cols=['category','subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error'];
+  pre.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c.replaceAll('_',' ')}</th>`).join('')+'</tr></thead><tbody>'+latsolBulkState.rows.slice(0,100).map(r=>'<tr>'+cols.map(c=>`<td>${safeAdmin(r[c]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>'+(latsolBulkState.rows.length>100?'<div class="bulk-help" style="padding:10px">Menampilkan 100 baris pertama untuk preview.</div>':'');
+  btn.disabled=!(latsolBulkState.valid>0&&latsolBulkState.invalid===0);
+}
+function autoSelectLatsolCategory(rows){
+  const select=document.getElementById('lCategory');
+  if(!select||select.value)return;
+  const name=cleanCell((rows||[]).map(r=>r.category).find(Boolean)||'').toLowerCase();
+  if(!name)return;
+  const found=categories.find(c=>String(c.id)===name||String(c.name||'').toLowerCase()===name||String(c.slug||'').toLowerCase()===name);
+  if(found)select.value=found.id;
+}
+function revalidateLatsolBulk(){
+  if(!latsolBulkState.parsed)return;
+  const checked=validateLatsolRows(latsolBulkState.rows);
+  latsolBulkState.rows=checked.rows;
+  latsolBulkState.valid=checked.valid;
+  latsolBulkState.invalid=checked.invalid;
+  renderLatsolBulkState();
 }
 async function handleLatsolBulkFile(input){
-  const sum=document.getElementById('bulkLatsolSummary'),pre=document.getElementById('bulkLatsolPreview'),btn=document.getElementById('bulkLatsolImportBtn');sum.innerHTML='<span class="bulk-pill">Membaca file...</span>';pre.innerHTML='';btn.disabled=true;
-  if(!document.getElementById('lCategory')?.value){sum.innerHTML='<span class="bulk-pill bad">Pilih kategori terlebih dahulu.</span>';return}
-  const result=await parseBulkFile('questions',input.files?.[0]);if(result.error){sum.innerHTML='<span class="bulk-pill bad">'+safeAdmin(result.error)+'</span>';return}
-  Object.assign(latsolBulkState,validateLatsolRows(result.rows));sum.innerHTML=`<span class="bulk-pill">Total ${latsolBulkState.rows.length}</span><span class="bulk-pill ok">Siap ${latsolBulkState.valid}</span><span class="bulk-pill bad">Perlu diperbaiki ${latsolBulkState.invalid}</span>`;
-  const cols=['subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error'];pre.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c.replaceAll('_',' ')}</th>`).join('')+'</tr></thead><tbody>'+latsolBulkState.rows.slice(0,100).map(r=>'<tr>'+cols.map(c=>`<td>${safeAdmin(r[c]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>'+(latsolBulkState.rows.length>100?'<div class="bulk-help" style="padding:10px">Menampilkan 100 baris pertama untuk preview.</div>':'');btn.disabled=!(latsolBulkState.valid>0&&latsolBulkState.invalid===0);
+  const sum=document.getElementById('bulkLatsolSummary'),pre=document.getElementById('bulkLatsolPreview'),btn=document.getElementById('bulkLatsolImportBtn');
+  if(!input.files?.[0])return;
+  sum.innerHTML='<span class="bulk-pill">Membaca file...</span>';pre.innerHTML='';btn.disabled=true;
+  const result=await parseBulkFile('questions',input.files[0]);
+  if(result.error){
+    latsolBulkState.rows=[];latsolBulkState.valid=0;latsolBulkState.invalid=0;latsolBulkState.parsed=false;
+    sum.innerHTML='<span class="bulk-pill bad">'+safeAdmin(result.error)+'</span>';
+    return;
+  }
+  latsolBulkState.rows=result.rows;
+  latsolBulkState.parsed=true;
+  autoSelectLatsolCategory(result.rows);
+  const checked=validateLatsolRows(result.rows);
+  latsolBulkState.rows=checked.rows;
+  latsolBulkState.valid=checked.valid;
+  latsolBulkState.invalid=checked.invalid;
+  const firstSub=cleanCell(result.rows.map(r=>r.subcategory).find(Boolean)||'');
+  if(firstSub&&!cleanCell(document.getElementById('lSubcategory')?.value||''))document.getElementById('lSubcategory').value=firstSub;
+  const title=document.getElementById('lTitle');
+  if(title&&!cleanCell(title.value)){
+    const cat=categories.find(c=>String(c.id)===String(document.getElementById('lCategory')?.value||''));
+    title.value=[cat?.name,firstSub].filter(Boolean).join(' — ')||'Paket Latsol';
+  }
+  renderLatsolBulkState();
 }
 async function importLatsolPackage(){
-  if(!latsolBulkState.valid||latsolBulkState.invalid)return;const catId=document.getElementById('lCategory')?.value||'';if(!catId)return msg('latsolMsg','Kategori wajib dipilih.','err');const payload=latsolBulkState.rows.filter(r=>!r.error).map(r=>({subcategory:r.subcategory||null,type:r.type,question_text:r.question_text.trim(),question_image_url:r.question_image_url||null,option_a:r.option_a.trim(),option_b:r.option_b.trim(),option_c:r.option_c.trim(),option_d:r.option_d.trim(),option_e:r.option_e?.trim()||null,correct_answer:r.correct_answer,explanation:r.explanation?.trim()||null,difficulty:r.difficulty||'medium',question_year:r.question_year?Number(r.question_year):null}));const btn=document.getElementById('bulkLatsolImportBtn');btn.disabled=true;btn.textContent='Mengimpor paket...';
-  try{const {error}=await sb.rpc('create_latsol_with_questions',{p_title:document.getElementById('lTitle').value.trim(),p_description:document.getElementById('lDescription').value.trim()||null,p_category_id:catId,p_subcategory:document.getElementById('lSubcategory').value.trim()||null,p_duration_minutes:Number(document.getElementById('lDuration').value)||20,p_is_premium:document.getElementById('lPremium').value==='true',p_is_published:document.getElementById('lPublished').value==='true',p_rows:payload});if(error)throw error;msg('latsolMsg',`Paket Latsol berhasil dibuat dengan ${payload.length} soal.`,'ok');document.getElementById('bulkLatsolFile').value='';document.getElementById('lTitle').value='';document.getElementById('lDescription').value='';document.getElementById('lSubcategory').value='';latsolBulkState.rows=[];latsolBulkState.valid=0;latsolBulkState.invalid=0;document.getElementById('bulkLatsolSummary').innerHTML='';document.getElementById('bulkLatsolPreview').innerHTML='';await loadLatsolAdmin()}catch(e){msg('latsolMsg',e.message||'Import paket Latsol gagal.','err')}finally{btn.disabled=false;btn.textContent='Import Paket Latsol'}
+  const title=cleanCell(document.getElementById('lTitle')?.value||'');
+  const catId=document.getElementById('lCategory')?.value||'';
+  if(!title)return msg('latsolMsg','Judul Paket Latsol wajib diisi.','err');
+  if(!catId)return msg('latsolMsg','Kategori wajib dipilih.','err');
+  if(!latsolBulkState.parsed||!latsolBulkState.rows.length)return msg('latsolMsg','Upload file Excel/CSV Latsol terlebih dahulu.','err');
+  revalidateLatsolBulk();
+  if(!latsolBulkState.valid||latsolBulkState.invalid)return msg('latsolMsg','Masih ada baris file yang perlu diperbaiki. Lihat preview merah/error.','err');
+  const payload=latsolBulkState.rows.filter(r=>!r.error).map(r=>({
+    subcategory:r.subcategory||null,type:r.type,
+    question_text:r.question_text.trim(),question_image_url:r.question_image_url||null,
+    option_a:r.option_a.trim(),option_b:r.option_b.trim(),option_c:r.option_c.trim(),option_d:r.option_d.trim(),option_e:r.option_e?.trim()||null,
+    correct_answer:r.correct_answer,explanation:r.explanation?.trim()||null,
+    difficulty:r.difficulty||'medium',question_year:r.question_year?Number(r.question_year):null
+  }));
+  const btn=document.getElementById('bulkLatsolImportBtn');btn.disabled=true;btn.textContent='Mengimpor paket...';
+  try{
+    const {data,error}=await sb.rpc('create_latsol_with_questions',{
+      p_title:title,
+      p_description:cleanCell(document.getElementById('lDescription')?.value||'')||null,
+      p_category_id:catId,
+      p_subcategory:cleanCell(document.getElementById('lSubcategory')?.value||'')||null,
+      p_duration_minutes:Number(document.getElementById('lDuration')?.value)||20,
+      p_is_premium:document.getElementById('lPremium')?.value==='true',
+      p_is_published:document.getElementById('lPublished')?.value==='true',
+      p_rows:payload
+    });
+    if(error)throw error;
+    msg('latsolMsg',`Paket Latsol berhasil dibuat dengan ${payload.length} soal. ID: ${data||'-'}`,'ok');
+    document.getElementById('bulkLatsolFile').value='';
+    latsolBulkState.rows=[];latsolBulkState.valid=0;latsolBulkState.invalid=0;latsolBulkState.parsed=false;
+    document.getElementById('bulkLatsolSummary').innerHTML='';document.getElementById('bulkLatsolPreview').innerHTML='';
+    await loadLatsolAdmin();
+  }catch(e){
+    console.error('Latsol import failed:',e);
+    msg('latsolMsg',`Import paket Latsol gagal: ${e?.message||'Terjadi kesalahan.'}`,'err');
+  }finally{btn.disabled=false;btn.textContent='Import Paket Latsol';}
 }
 function addLatsolConfig(){return importLatsolPackage()}
 function downloadLatsolTemplate(format){const data=[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:''}];const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Latsol');if(format==='csv'){const csv=XLSX.utils.sheet_to_csv(ws),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='template-latsol-siap-asn.csv';a.click();URL.revokeObjectURL(a.href)}else XLSX.writeFile(wb,'template-latsol-siap-asn.xlsx')}
