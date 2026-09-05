@@ -338,7 +338,7 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
     <div class="bulk-box" style="margin-top:16px"><div class="bulk-help"><b>Format sama seperti Bank Soal.</b> Satu baris = satu soal. Subkategori boleh berbeda per baris. Minimal: Pertanyaan, Opsi A-D, Jawaban Benar.</div><input id="bulkLatsolFile" class="bulk-file" type="file" accept=".csv,.xlsx,.xls" onchange="handleLatsolBulkFile(this)"><div id="bulkLatsolSummary" class="bulk-summary"></div><div id="bulkLatsolPreview" class="bulk-preview"></div><div class="import-progress" id="bulkLatsolProgress"><div></div></div><div style="display:flex;justify-content:flex-end;gap:10px;margin-top:14px"><button id="bulkLatsolImportBtn" class="btn primary" type="button" disabled onclick="importLatsolPackage()">Import Paket Latsol</button></div></div>
     <div id="latsolMsg" class="notice"></div>
    </div>
-   <div class="panel"><div class="panel-head"><div><h3>Katalog Latsol</h3><p class="muted">Status paket dan performa peserta dibaca langsung dari Supabase.</p></div><button class="btn" onclick="loadLatsolAdmin()">Muat ulang</button></div><div id="latsolAdminSummary" class="admin-coverage"></div><div id="latsolsList"></div></div>
+   <div class="panel"><div class="panel-head"><h3>Katalog Latsol</h3><button class="btn" onclick="loadLatsolAdmin()">Muat ulang</button></div><div id="latsolsList"></div></div>
   </div>
 
   <div class="page" id="drilling">
@@ -370,6 +370,8 @@ html,body{background:var(--a-bg)!important;color:var(--a-ink)!important}body{fon
       <div><label>Urutan Tampil</label><input id="bannerSort" type="number" min="1" value="1"></div>
       <div class="full"><label>Subjudul (opsional)</label><input id="bannerSubtitle" placeholder="Contoh: Belajar lebih siap bersama SIAP ASN"></div>
       <div class="full"><label>Link Tujuan (opsional)</label><input id="bannerLink" placeholder="https://..."></div>
+      <div><label>Posisi Banner</label><select id="bannerPlacement"><option value="hero">Banner Utama / Slideshow</option><option value="side">Banner Kecil Samping</option></select></div>
+      <div><label>Teks Tombol (opsional)</label><input id="bannerCta" placeholder="Contoh: Mulai Sekarang"></div>
       <div class="full banner-upload-box">
         <label>Upload Gambar Banner</label>
         <div class="banner-spec"><b>Ukuran disarankan: 1920 × 600 px</b><br>Rasio: 16:5 • Format: JPG, PNG, WEBP • Maksimal: 3 MB</div>
@@ -658,6 +660,8 @@ function clearBannerForm(){
   document.getElementById('bannerSort').value='1';
   document.getElementById('bannerFile').value='';
   document.getElementById('bannerActive').checked=true;
+  if(document.getElementById('bannerPlacement'))document.getElementById('bannerPlacement').value='hero';
+  if(document.getElementById('bannerCta'))document.getElementById('bannerCta').value='';
   document.getElementById('bannerPreview').style.display='none';
   document.getElementById('bannerMsg').style.display='none';
 }
@@ -669,6 +673,8 @@ async function saveBanner(){
   const link=document.getElementById('bannerLink').value.trim()||null;
   const sortOrder=Number(document.getElementById('bannerSort').value)||1;
   const isActive=document.getElementById('bannerActive').checked;
+  const placement=document.getElementById('bannerPlacement')?.value||'hero';
+  const ctaLabel=document.getElementById('bannerCta')?.value.trim()||null;
   const btn=document.getElementById('saveBannerBtn');
   const wrap=document.getElementById('bannerUploadProgress');
   const bar=document.getElementById('bannerUploadBar');
@@ -701,7 +707,9 @@ async function saveBanner(){
       image_url:publicUrl,
       action_url:link,
       sort_order:sortOrder,
-      is_active:isActive
+      is_active:isActive,
+      placement:placement,
+      cta_label:ctaLabel
     });
     if(result.error)throw result.error;
 
@@ -749,7 +757,7 @@ async function loadBanners(){
 
       const meta=document.createElement('div');
       meta.className='muted';
-      meta.textContent='Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
+      meta.textContent=((b.placement==='side')?'Banner Kecil Samping':'Banner Utama / Slideshow')+' • Urutan '+(b.sort_order||0)+' • '+(b.is_active?'Aktif':'Nonaktif');
 
       const del=document.createElement('button');
       del.type='button';
@@ -823,33 +831,9 @@ refreshLucideIcons();
 <script>
 /* === SIAP ASN LEARNING ENGINE ADMIN V2 === */
 async function loadLatsolAdmin(){
-  const e=document.getElementById('latsolsList');
-  const summary=document.getElementById('latsolAdminSummary');
-  if(!e)return;
-  e.innerHTML='<div class="empty">Memuat katalog Latsol...</div>';
-  try{
-    const {data,error}=await sb.rpc('get_latsol_catalog_v2');
-    if(error)throw error;
-    const rows=data||[];
-    const total=rows.length;
-    const published=rows.filter(x=>x.is_published).length;
-    const premium=rows.filter(x=>x.is_premium).length;
-    const attempts=rows.reduce((n,x)=>n+Number(x.attempts||0),0);
-    if(summary)summary.innerHTML=`
-      <div class="coverage-row"><span>Total Paket</span><b>${total}</b><small>Semua paket published</small></div>
-      <div class="coverage-row"><span>Gratis</span><b>${Math.max(0,total-premium)}</b><small>Akses reguler</small></div>
-      <div class="coverage-row"><span>Premium</span><b>${premium}</b><small>Memerlukan membership</small></div>
-      <div class="coverage-row"><span>Total Dikerjakan</span><b>${attempts}</b><small>Riwayat peserta</small></div>`;
-    e.innerHTML=rows.map(x=>{
-      const status=x.is_premium?'Premium':'Gratis';
-      const perf=Number(x.attempts||0)>0?` · ${Number(x.attempts||0)}x dikerjakan · Best ${Number(x.best_score||0)}%`:' · Belum dikerjakan peserta';
-      return `<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.category_icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.category_name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${Number(x.question_count||0)} soal · ${Number(x.duration_minutes||0)} menit${perf}</div></div><div class="row-actions"><span class="chip">${status}</span><span class="chip">${x.has_access?'Akses OK':'Terkunci reguler'}</span></div></div>`;
-    }).join('')||'<div class="empty">Belum ada paket Latsol published. Buat paket dari panel di atas lalu pilih status Published.</div>';
-    refreshLucideIcons();
-  }catch(err){
-    if(summary)summary.innerHTML='';
-    e.innerHTML='<div class="empty">Gagal memuat katalog Latsol: '+safeAdmin(err.message||'Terjadi kesalahan.')+'</div>';
-  }
+  const {data,error}=await sb.from('latsol_configs').select('id,title,category_id,subcategory,question_count,duration_minutes,is_premium,is_published,sort_order,categories(name,icon)').order('sort_order').order('created_at',{ascending:false});
+  const e=document.getElementById('latsolsList');if(!e)return;if(error){e.innerHTML='<div class="empty">'+safeAdmin(error.message)+'</div>';return}
+  e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b><span class="icon-preview-cell" style="width:26px;height:26px;vertical-align:middle;margin-right:5px">${renderAdminIcon(x.categories?.icon||'clipboard-list')}</span>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.categories?.name||'-')}${x.subcategory?' · '+safeAdmin(x.subcategory):''} · ${x.question_count} soal · ${x.duration_minutes} menit</div></div><span class="chip">${x.is_published?(x.is_premium?'Premium':'Published'):'Draft'}</span></div>`).join('')||'<div class="empty">Belum ada paket Latsol.</div>';refreshLucideIcons();
 }
 const latsolBulkState={rows:[],valid:0,invalid:0};
 function validateLatsolRows(rows){
