@@ -582,7 +582,7 @@ function normalizeDifficulty(v){const s=cleanCell(v).toLowerCase();if(['easy','m
 function normalizeType(v){const s=cleanCell(v).toLowerCase();return ['twk','tiu','tkp','other'].includes(s)?s:(s.includes('twk')?'twk':s.includes('tiu')?'tiu':s.includes('tkp')?'tkp':'other')}
 function pick(row,aliases){for(const a of aliases){const key=normalizeHeader(a);if(Object.prototype.hasOwnProperty.call(row,key)&&cleanCell(row[key])!=='')return cleanCell(row[key])}return ''}
 function buildNormalizedRows(rawRows,kind){
- const qAliases={category:['kategori','category','kategori_utama'],subcategory:['subkategori','subcategory','sub_category','materi','materi_soal'],type:['jenis','type'],question_text:['pertanyaan','question_text','soal','question'],question_image_url:['url_gambar','question_image_url','gambar'],option_a:['opsi_a','option_a','a'],option_b:['opsi_b','option_b','b'],option_c:['opsi_c','option_c','c'],option_d:['opsi_d','option_d','d'],option_e:['opsi_e','option_e','e'],correct_answer:['jawaban_benar','correct_answer','jawaban','kunci'],explanation:['pembahasan','explanation','penjelasan'],difficulty:['kesulitan','difficulty','tingkat_kesulitan'],question_year:['tahun','tahun_soal','question_year'],is_active:['aktif','is_active','status']};
+ const qAliases={category:['kategori','category','kategori_utama'],subcategory:['subkategori','subcategory','sub_category','materi','materi_soal'],type:['jenis','type'],question_text:['pertanyaan','question_text','soal','question'],question_image_url:['url_gambar','question_image_url','gambar'],option_a:['opsi_a','option_a','a'],option_b:['opsi_b','option_b','b'],option_c:['opsi_c','option_c','c'],option_d:['opsi_d','option_d','d'],option_e:['opsi_e','option_e','e'],correct_answer:['jawaban_benar','correct_answer','jawaban','kunci'],explanation:['pembahasan','explanation','penjelasan'],difficulty:['kesulitan','difficulty','tingkat_kesulitan'],question_year:['tahun','tahun_soal','question_year'],is_active:['aktif','is_active','status'],option_a_score:['nilai_a','option_a_score','score_a','bobot_a'],option_b_score:['nilai_b','option_b_score','score_b','bobot_b'],option_c_score:['nilai_c','option_c_score','score_c','bobot_c'],option_d_score:['nilai_d','option_d_score','score_d','bobot_d'],option_e_score:['nilai_e','option_e_score','score_e','bobot_e']};
  const mAliases={category:['kategori','category','kategori_utama'],subcategory:['subkategori','subcategory','sub_category'],title:['judul','title','nama_materi'],summary:['ringkasan','summary','deskripsi'],content:['isi_materi','content','isi','materi'],cover_url:['url_cover','cover_url','gambar'],is_premium:['premium','is_premium','akses'],is_published:['publikasi','is_published','status'],sort_order:['urutan','sort_order']};
  const aliases=kind==='questions'?qAliases:mAliases;
  return rawRows.map((r,i)=>{
@@ -911,9 +911,16 @@ function validateLatsolRows(rows){
     r.correct_answer=cleanCell(raw.correct_answer).toUpperCase();
     if(!catId)r.error='Pilih kategori Latsol terlebih dahulu.';
     if(!r.question_text||!r.option_a||!r.option_b||!r.option_c||!r.option_d)r.error=r.error||'Pertanyaan dan Opsi A-D wajib diisi.';
-    if(!['A','B','C','D','E'].includes(r.correct_answer))r.error=r.error||'Jawaban benar harus A/B/C/D/E.';
-    if(r.correct_answer==='E'&&!r.option_e)r.error=r.error||'Opsi E wajib diisi jika jawaban E.';
-    if(expectedType!=='other'&&r.type!==expectedType)r.error=r.error||`Jenis soal harus ${expectedType.toUpperCase()} untuk kategori ${cat?.name||'ini'}.`;
+    if(r.type==='tkp'){
+      if(!r.option_e)r.error=r.error||'TKP wajib memiliki Opsi E.';
+      const scores=['a','b','c','d','e'].map(k=>Number(r['option_'+k+'_score']));
+      if(scores.some(n=>!Number.isInteger(n)||n<1||n>5))r.error=r.error||'Bobot TKP Nilai A-E wajib diisi dengan angka 1-5.';
+      else if([...scores].sort((x,y)=>x-y).join(',')!=='1,2,3,4,5')r.error=r.error||'Bobot TKP harus tepat 1, 2, 3, 4, 5 masing-masing satu kali.';
+    }else{
+      if(!['A','B','C','D','E'].includes(r.correct_answer))r.error=r.error||'Jawaban benar harus A/B/C/D/E.';
+      if(r.correct_answer==='E'&&!r.option_e)r.error=r.error||'Opsi E wajib diisi jika jawaban E.';
+    }
+    if(expectedType&&expectedType!=='other'&&r.type!==expectedType)r.error=r.error||`Jenis soal harus ${expectedType.toUpperCase()} untuk kategori ${cat?.name||'ini'}.`;
     if(r.question_year&&(!Number.isInteger(Number(r.question_year))||Number(r.question_year)<2000||Number(r.question_year)>2100))r.error=r.error||'Tahun soal tidak valid.';
     if(r.error)invalid++;else valid++;
     out.push(r);
@@ -924,7 +931,7 @@ function renderLatsolBulkState(){
   const sum=document.getElementById('bulkLatsolSummary'),pre=document.getElementById('bulkLatsolPreview'),btn=document.getElementById('bulkLatsolImportBtn');
   if(!sum||!pre||!btn)return;
   sum.innerHTML=`<span class="bulk-pill">Total ${latsolBulkState.rows.length}</span><span class="bulk-pill ok">Siap ${latsolBulkState.valid}</span><span class="bulk-pill bad">Perlu diperbaiki ${latsolBulkState.invalid}</span>`;
-  const cols=['category','subcategory','type','question_text','option_a','option_b','option_c','option_d','correct_answer','difficulty','question_year','error'];
+  const cols=['category','subcategory','type','question_text','option_a','option_b','option_c','option_d','option_e','option_a_score','option_b_score','option_c_score','option_d_score','option_e_score','correct_answer','difficulty','question_year','error'];
   pre.innerHTML='<table><thead><tr>'+cols.map(c=>`<th>${c.replaceAll('_',' ')}</th>`).join('')+'</tr></thead><tbody>'+latsolBulkState.rows.slice(0,100).map(r=>'<tr>'+cols.map(c=>`<td>${safeAdmin(r[c]??'')}</td>`).join('')+'</tr>').join('')+'</tbody></table>'+(latsolBulkState.rows.length>100?'<div class="bulk-help" style="padding:10px">Menampilkan 100 baris pertama untuk preview.</div>':'');
   btn.disabled=!(latsolBulkState.valid>0&&latsolBulkState.invalid===0);
 }
@@ -983,7 +990,12 @@ async function importLatsolPackage(){
     question_text:r.question_text.trim(),question_image_url:r.question_image_url||null,
     option_a:r.option_a.trim(),option_b:r.option_b.trim(),option_c:r.option_c.trim(),option_d:r.option_d.trim(),option_e:r.option_e?.trim()||null,
     correct_answer:r.correct_answer,explanation:r.explanation?.trim()||null,
-    difficulty:r.difficulty||'medium',question_year:r.question_year?Number(r.question_year):null
+    difficulty:r.difficulty||'medium',question_year:r.question_year?Number(r.question_year):null,
+    option_a_score:r.type==='tkp'?Number(r.option_a_score):null,
+    option_b_score:r.type==='tkp'?Number(r.option_b_score):null,
+    option_c_score:r.type==='tkp'?Number(r.option_c_score):null,
+    option_d_score:r.type==='tkp'?Number(r.option_d_score):null,
+    option_e_score:r.type==='tkp'?Number(r.option_e_score):null
   }));
   const btn=document.getElementById('bulkLatsolImportBtn');btn.disabled=true;btn.textContent='Mengimpor paket...';
   try{
@@ -1009,7 +1021,7 @@ async function importLatsolPackage(){
   }finally{btn.disabled=false;btn.textContent='Import Paket Latsol';}
 }
 function addLatsolConfig(){return importLatsolPackage()}
-function downloadLatsolTemplate(format){const data=[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:''}];const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Latsol');if(format==='csv'){const csv=XLSX.utils.sheet_to_csv(ws),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='template-latsol-siap-asn.csv';a.click();URL.revokeObjectURL(a.href)}else XLSX.writeFile(wb,'template-latsol-siap-asn.xlsx')}
+function downloadLatsolTemplate(format){const data=[{Kategori:'TWK',Subkategori:'Nasionalisme',Jenis:'twk',Pertanyaan:'Contoh pertanyaan...',Opsi_A:'Jawaban A',Opsi_B:'Jawaban B',Opsi_C:'Jawaban C',Opsi_D:'Jawaban D',Opsi_E:'Jawaban E',Jawaban_Benar:'A',Pembahasan:'Pembahasan...',Kesulitan:'medium',Tahun_Soal:'2026',URL_Gambar:'',Nilai_A:'1',Nilai_B:'2',Nilai_C:'3',Nilai_D:'4',Nilai_E:'5'}];const ws=XLSX.utils.json_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Latsol');if(format==='csv'){const csv=XLSX.utils.sheet_to_csv(ws),blob=new Blob([csv],{type:'text/csv;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='template-latsol-siap-asn.csv';a.click();URL.revokeObjectURL(a.href)}else XLSX.writeFile(wb,'template-latsol-siap-asn.xlsx')}
 async function loadDrillingAdmin(){
  const e=document.getElementById('drillingCoverage');if(!e)return;
  const [{data:sdata,error:se},{count:qcount,error:qe}]=await Promise.all([
