@@ -1077,4 +1077,156 @@ async function createAndGenerateTryout(){const twk=Math.max(0,Number(document.ge
 const _loadPageBaseFinal=loadPage;loadPage=async function(id){if(id==='latsols')await loadLatsolAdmin();if(id==='drilling')await loadDrillingAdmin();if(id==='tryouts'){const {data,error}=await sb.from('tryouts').select('id,title,type,status,duration_minutes,is_premium,created_at').order('created_at',{ascending:false});if(!error){const counts={};const ids=(data||[]).map(x=>x.id);if(ids.length){const {data:q}=await sb.from('tryout_questions').select('tryout_id');(q||[]).forEach(x=>counts[x.tryout_id]=(counts[x.tryout_id]||0)+1)}const e=document.getElementById('tryoutsList');if(e)e.innerHTML=(data||[]).map(x=>`<div class="admin-list-card"><div><b>${safeAdmin(x.title)}</b><div class="muted">${safeAdmin(x.type)} · ${safeAdmin(x.status)} · ${x.duration_minutes} menit · ${counts[x.id]||0} soal</div></div><div class="row-actions"><span class="chip">${x.is_premium?'Premium':'Gratis'}</span><button class="btn" onclick="regenerateTryout('${x.id}')">Regenerate</button></div></div>`).join('')||'<div class="empty">Belum ada tryout.</div>';return}}return _loadPageBaseFinal(id)};
 async function regenerateTryout(id){if(!confirm('Generate ulang tryout ini dengan komposisi 30 TWK / 35 TIU / 45 TKP? Soal lama akan diganti.'))return;const {error}=await sb.rpc('generate_tryout_random',{p_tryout_id:id,p_twk:30,p_tiu:35,p_tkp:45,p_difficulty:null,p_question_year:null});if(error)alert(error.message);else{alert('Tryout berhasil di-generate ulang.');await loadPage('tryouts')}}
 </script>
+
+
+<!-- SIAP ASN ADMIN UNIFIED PREMIUM COLOR SYSTEM v4 -->
+<style id="siap-asn-admin-premium-v4">
+:root{
+ --ad-bg:#f4f8fd;--ad-ink:#102b4d;--ad-ink2:#294765;--ad-line:#cbdbea;
+ --ad-blue:#155eef;--ad-navy:#103b73;--ad-purple:#6654d9;--ad-green:#0b8064;--ad-red:#b93646;--ad-gold:#a96f00;
+}
+html,body{
+ background:
+ radial-gradient(800px 340px at 100% -5%,rgba(47,141,247,.12),transparent 60%),
+ radial-gradient(760px 330px at 0% 0%,rgba(102,84,217,.09),transparent 58%),
+ linear-gradient(180deg,#f9fbff,#f1f6fb 100%)!important;
+ color:var(--ad-ink)!important;
+}
+.sidebar{
+ background:linear-gradient(180deg,#fff 0%,#f6faff 100%)!important;
+ border-right:1px solid var(--ad-line)!important;
+ box-shadow:10px 0 30px rgba(16,59,115,.06)!important;
+}
+.side-brand{border-bottom:1px solid #dfe9f3!important}
+.brand{color:var(--ad-navy)!important}
+.brand b{color:#155eef!important}
+.navbtn{color:#294765!important}
+.navbtn:hover{background:linear-gradient(90deg,#e9f3ff,#f8fbff)!important;color:#155aab!important}
+.navbtn.active{
+ background:linear-gradient(135deg,#dcecff,#edf6ff)!important;
+ color:#0c4d95!important;
+ box-shadow:inset 4px 0 #155eef!important;
+}
+.admin-nav-label{color:#155eef!important}
+
+/* Generic admin containers */
+.panel,.stat,.bulk-box,.generator-hero,.admin-list-card,.admin-mode-card,.coverage-row,
+.cat-icon-preview,.icon-preview-cell,.table-card,.chart-card,.kpi-card,.notice-card,.form-card{
+ border:1px solid #cbdbea!important;
+ box-shadow:0 10px 25px rgba(16,59,115,.07)!important;
+}
+.panel,.bulk-box,.generator-hero,.admin-list-card,.admin-mode-card,.coverage-row{
+ background:linear-gradient(145deg,#fff,#f1f7fd)!important;
+}
+.panel:hover,.stat:hover,.admin-list-card:hover,.admin-mode-card:hover{
+ box-shadow:0 16px 32px rgba(16,59,115,.11)!important;
+ border-color:#91b7e1!important;
+}
+.top{
+ background:rgba(255,255,255,.95)!important;
+ border-color:#cbdbea!important;
+ box-shadow:0 7px 24px rgba(16,59,115,.06)!important;
+}
+.top h1{color:var(--ad-navy)!important}
+.muted,.bulk-help,.banner-spec,.icon-picker-help,.admin-mode-card span,.coverage-row small{color:#355674!important}
+label{color:#214b70!important}
+
+/* Dashboard stats as colorful tiles */
+.grid{gap:16px!important}
+.grid>.stat:nth-child(1){background:linear-gradient(135deg,#1565c0,#0f478d)!important;color:#fff!important;border:0!important}
+.grid>.stat:nth-child(2){background:linear-gradient(135deg,#6c58d8,#4934a5)!important;color:#fff!important;border:0!important}
+.grid>.stat:nth-child(3){background:linear-gradient(135deg,#0f9b77,#087258)!important;color:#fff!important;border:0!important}
+.grid>.stat:nth-child(4){background:linear-gradient(135deg,#d39b24,#9a6500)!important;color:#fff!important;border:0!important}
+.grid>.stat *{color:#fff!important}
+
+/* Buttons / inputs */
+.btn{
+ border-radius:12px!important;
+ background:#fff!important;
+ color:#123e68!important;
+ border:1px solid #a7c2dd!important;
+}
+.btn:hover{background:#edf6ff!important;color:#0c4f97!important;border-color:#5996d5!important}
+.btn.primary,.primary{
+ background:linear-gradient(135deg,#1565c0,#0e3f86)!important;
+ color:#fff!important;border:0!important;
+ box-shadow:0 9px 20px rgba(15,76,151,.20)!important;
+}
+.btn.danger,.danger{background:#fff0f0!important;color:#a92e3f!important;border-color:#f0b9bf!important}
+input,select,textarea{background:#fff!important;color:#102b4d!important;border-color:#bfd0e1!important}
+input::placeholder,textarea::placeholder{color:#59758f!important;opacity:1!important}
+input:focus,select:focus,textarea:focus{border-color:#3f86d4!important;box-shadow:0 0 0 4px rgba(21,94,239,.11)!important}
+
+/* Latsol / drilling admin mode cards */
+.generator-hero{
+ background:
+ radial-gradient(420px 180px at 80% 10%,rgba(52,137,239,.16),transparent 65%),
+ linear-gradient(135deg,#ffffff,#edf6ff)!important;
+ border-radius:22px!important;
+}
+.generator-kicker{color:#155eef!important}
+.generator-badge{background:#dcecff!important;color:#0d4f99!important;border:1px solid #b9d2eb!important}
+.admin-mode-card{
+ border-left:4px solid #155eef!important;
+ background:linear-gradient(135deg,#f6fbff,#fff)!important;
+}
+.admin-mode-card:nth-child(2){border-left-color:#6654d9!important}
+.admin-mode-card:nth-child(3){border-left-color:#b93646!important}
+.admin-mode-card:nth-child(4){border-left-color:#a96f00!important}
+.admin-mode-card b{color:#102b4d!important}
+
+/* Bulk boxes */
+.bulk-box{background:linear-gradient(145deg,#fff,#f0f6fc)!important}
+.bulk-file{background:#f6faff!important;border-color:#9fbbd7!important}
+.bulk-pill{background:#eaf2fb!important;color:#294765!important}
+.bulk-pill.ok{background:#e4f4ed!important;color:#0b6d52!important}
+.bulk-pill.bad{background:#fff0f0!important;color:#a92e3f!important}
+.bulk-preview{background:#fff!important;border-color:#cbdbea!important}
+.import-progress{background:#e4edf6!important}
+.import-progress>div{background:linear-gradient(90deg,#1565c0,#0b8064)!important}
+
+/* Forms / question editor */
+.question-type-badge,.tag{background:#e6f1ff!important;color:#125aa6!important;border-color:#b8d1ea!important}
+.notice.ok{background:#eaf8f2!important;color:#0b6d52!important;border-color:#bfe7d8!important}
+.notice.err{background:#fff0f0!important;color:#a92e3f!important;border-color:#efc0c5!important}
+table{background:#fff!important;border-color:#cbdbea!important}
+th{background:#eaf2fb!important;color:#214b70!important}
+td{color:#102b4d!important;border-color:#e1e9f1!important}
+
+/* Login */
+.login{
+ background:
+ radial-gradient(520px 240px at 10% 10%,rgba(21,101,192,.18),transparent 65%),
+ radial-gradient(520px 260px at 90% 85%,rgba(102,84,217,.14),transparent 65%),
+ #eff5fb!important;
+}
+.login-card{
+ background:linear-gradient(145deg,#fff,#f1f7fd)!important;
+ border:1px solid #cbdbea!important;
+ box-shadow:0 28px 70px rgba(16,59,115,.14)!important;
+}
+.login-card .brand{color:#103b73!important}
+.login-card .muted{color:#355674!important}
+.login-card label{color:#214b70!important}
+
+/* Mobile */
+@media(max-width:850px){
+ .main{padding:16px!important}
+ .grid{grid-template-columns:1fr 1fr!important}
+}
+@media(max-width:560px){
+ .grid{grid-template-columns:1fr!important}
+ .panel,.bulk-box,.generator-hero{border-radius:16px!important}
+}
+</style>
+
+<style id="siap-asn-admin-final-contrast-v5">
+/* Final admin readability guard */
+.grid>.stat span,.grid>.stat b,.grid>.stat small{color:#fff!important}
+.admin-mode-card b{color:#102b4d!important}
+.admin-mode-card span{color:#355674!important}
+.panel h1,.panel h2,.panel h3,.panel h4,.bulk-box h3,.generator-hero h2{color:#103b73!important}
+.card,.panel,.box,.form-card,.table-card,.chart-card,.kpi-card{color:#102b4d!important}
+</style>
+
 </html>
