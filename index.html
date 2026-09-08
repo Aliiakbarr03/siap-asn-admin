@@ -899,8 +899,57 @@ async function deleteBanner(id){
 (async()=>{const {data:{session}}=await sb.auth.getSession();if(session)openApp()})();
 /* === ADMIN FEATURE LAYER === */
 function safeAdmin(x){return String(x??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
-async function addPlan(){try{const name=document.getElementById('planName').value.trim(),slug=document.getElementById('planSlug').value.trim()||slugify(name);if(!name||!slug)return msg('planMsg','Nama dan slug wajib diisi.','err');const p={name,slug,description:document.getElementById('planDescription').value.trim()||null,price:Number(document.getElementById('planPrice').value)||0,duration_days:Number(document.getElementById('planDays').value)||30,is_active:true,sort_order:0};const {error}=await sb.from('subscription_plans').insert(p);if(error)throw error;msg('planMsg','Paket berhasil ditambahkan.','ok');await loadAdminPremium()}catch(e){msg('planMsg',e.message,'err')}}
-async function loadAdminPremium(){const pe=document.getElementById('plansList'),pay=document.getElementById('paymentsList');if(!pe||!pay)return;const [plans,payments]=await Promise.all([sb.from('subscription_plans').select('id,name,slug,price,duration_days,is_active,sort_order').order('sort_order'),sb.from('payments').select('id,user_id,order_id,amount,status,plan_id,created_at,profiles(full_name)').order('created_at',{ascending:false}).limit(100)]);pe.innerHTML=plans.error?'<div class="empty">'+safeAdmin(plans.error.message)+'</div>':((plans.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px"><b>${safeAdmin(p.name)}</b><div class="muted">${safeAdmin(p.slug)} · Rp ${Number(p.price||0).toLocaleString('id-ID')} · ${p.duration_days} hari</div></div>`).join('')||'<div class="empty">Belum ada paket.</div>');pay.innerHTML=payments.error?'<div class="empty">'+safeAdmin(payments.error.message)+'</div>':((payments.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px"><b>${safeAdmin(p.profiles?.full_name||p.user_id)}</b><div class="muted">${safeAdmin(p.order_id)} · Rp ${Number(p.amount||0).toLocaleString('id-ID')} · ${safeAdmin(p.status)}</div>${p.status==='pending'?`<button class="btn primary" style="margin-top:10px" onclick="activatePremium('${p.user_id}','${p.id}')">Aktifkan Premium</button>`:''}</div>`).join('')||'<div class="empty">Belum ada pengajuan.</div>')}
+async function addPlan(){
+  try{
+    const name=document.getElementById('planName').value.trim();
+    const slug=document.getElementById('planSlug').value.trim()||slugify(name);
+    if(!name||!slug)return msg('planMsg','Nama dan slug wajib diisi.','err');
+    const p={
+      name,
+      slug,
+      description:document.getElementById('planDescription').value.trim()||null,
+      price:Number(document.getElementById('planPrice').value)||0,
+      duration_days:Number(document.getElementById('planDays').value)||30,
+      is_active:true,
+      sort_order:0
+    };
+    const {error}=await sb.from('subscription_plans').insert(p);
+    if(error)throw error;
+    msg('planMsg','Paket berhasil ditambahkan.','ok');
+    await loadAdminPremium();
+  }catch(e){
+    msg('planMsg',e.message||'Gagal menambahkan paket.','err');
+  }
+}
+
+async function deletePlan(planId){
+  if(!confirm('Hapus paket ini? Paket akan dihapus dari Daftar Paket, Supabase, dan tidak lagi muncul di Web Publish. Riwayat pembayaran tidak dihapus.'))return;
+  try{
+    const {error}=await sb.from('subscription_plans').delete().eq('id',planId);
+    if(error)throw error;
+    msg('planMsg','Paket berhasil dihapus.','ok');
+    await loadAdminPremium();
+  }catch(e){
+    msg('planMsg',e.message||'Gagal menghapus paket.','err');
+  }
+}
+
+async function loadAdminPremium(){
+  const pe=document.getElementById('plansList');
+  const pay=document.getElementById('paymentsList');
+  if(!pe||!pay)return;
+  const [plans,payments]=await Promise.all([
+    sb.from('subscription_plans').select('id,name,slug,price,duration_days,is_active,sort_order').order('sort_order'),
+    sb.from('payments').select('id,user_id,order_id,amount,status,plan_id,created_at,profiles(full_name)').order('created_at',{ascending:false}).limit(100)
+  ]);
+  pe.innerHTML=plans.error
+    ?'<div class="empty">'+safeAdmin(plans.error.message)+'</div>'
+    :((plans.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div><b>${safeAdmin(p.name)}</b><div class="muted">${safeAdmin(p.slug)} · Rp ${Number(p.price||0).toLocaleString('id-ID')} · ${p.duration_days} hari</div></div><button class="btn danger" type="button" onclick="deletePlan('${p.id}')">🗑️ Hapus</button></div>`).join('')||'<div class="empty">Belum ada paket.</div>');
+  pay.innerHTML=payments.error
+    ?'<div class="empty">'+safeAdmin(payments.error.message)+'</div>'
+    :((payments.data||[]).map(p=>`<div class="data-card" style="margin-bottom:10px"><b>${safeAdmin(p.profiles?.full_name||p.user_id)}</b><div class="muted">${safeAdmin(p.order_id)} · Rp ${Number(p.amount||0).toLocaleString('id-ID')} · ${safeAdmin(p.status)}</div>${p.status==='pending'?`<button class="btn primary" style="margin-top:10px" onclick="activatePremium('${p.user_id}','${p.id}')">Aktifkan Premium</button>`:''}</div>`).join('')||'<div class="empty">Belum ada pengajuan.</div>');
+}
+
 async function activatePremium(userId,paymentId){if(!confirm('Aktifkan premium untuk peserta ini?'))return;try{const {error}=await sb.rpc('admin_activate_premium',{p_user_id:userId,p_payment_id:paymentId});if(error)throw error;alert('Premium berhasil diaktifkan.');await loadAdminPremium();await loadPage('users')}catch(e){alert(e.message||'Gagal mengaktifkan premium.')}}
 async function broadcastNotification(){try{const title=document.getElementById('noticeTitle').value.trim(),message=document.getElementById('noticeMessage').value.trim();if(!title||!message)return msg('noticeMsg','Judul dan pesan wajib diisi.','err');const {data,error}=await sb.rpc('admin_notify_all',{p_title:title,p_message:message,p_type:'announcement'});if(error)throw error;msg('noticeMsg',(data||0)+' peserta menerima notifikasi.','ok');document.getElementById('noticeTitle').value='';document.getElementById('noticeMessage').value=''}catch(e){msg('noticeMsg',e.message,'err')}}
 const _loadPageOriginal=loadPage;window.loadPage=async function(id){await _loadPageOriginal(id);if(id==='premium')await loadAdminPremium()}
