@@ -11,7 +11,7 @@
 
 <section class="login" id="loginView">
   <div class="login-card">
-    <div class="brand"><div class="mark"><img src="/assets/logo.png" alt="SIAP ASN Logo"></div><span>SIAP ASN<span style="color:var(--cyan)">Admin</span></span></div>
+    <div class="brand"><div class="mark">📱</div><span>SIAP ASN<span style="color:var(--cyan)">Admin</span></span></div>
     <p class="muted">Masuk menggunakan akun administrator SIAP ASN.</p>
     <label>Email</label><input id="email" type="email" placeholder="admin@email.com">
     <label>Password</label><input id="password" type="password" placeholder="••••••••">
@@ -22,7 +22,7 @@
 
 <section class="app" id="appView">
   <aside class="sidebar">
-    <div class="side-brand"><div class="brand"><div class="mark"><img src="/assets/logo.png" alt="SIAP ASN Logo"></div><span>SIAP</span></div></div>
+    <div class="side-brand"><div class="brand"><div class="mark">📚</div><span>SIAP</span></div></div>
     <button class="navbtn active" onclick="window.showPage('dashboard',this)">🏠 <span>Dashboard</span></button>
     <button class="navbtn" onclick="window.showPage('categories',this)">🗂️ <span>Kategori</span></button>
     <button class="navbtn" onclick="window.showPage('questions',this)">📝 <span>Bank Soal</span></button>
@@ -46,7 +46,7 @@
         <div class="stat">👥 User<b id="statUsers">0</b></div><div class="stat">📝 Soal<b id="statQuestions">0</b></div>
         <div class="stat">📚 Materi<b id="statMaterials">0</b></div><div class="stat">🏆 Tryout<b id="statTryouts">0</b></div>
       </div>
-      <div class="panel"><h3>🔥 SIAP ASN Admin Panel v2 (Vite Build)</h3><p class="muted">Database sudah terhubung ke Supabase. Tambahkan konten dari menu sebelah kiri.</p></div>
+      <div class="panel"><h3>🔥 SIAP ASN Admin Panel v2 (Vite Build)</h3><p class="muted">✅ Database sudah terhubung ke Supabase. Tambahkan konten dari menu sebelah kiri.</p></div>
     </div>
 
     <div class="page" id="categories">
@@ -54,7 +54,6 @@
         <div class="form-grid">
           <div><label>Nama Kategori</label><input id="catName" oninput="if(!catSlug.dataset.touched)catSlug.value=window.slugify(catName.value)"></div>
           <div><label>Slug</label><input id="catSlug" oninput="catSlug.dataset.touched='1'"></div>
-          <div><label>Icon Kategori</label><select id="catIcon" aria-label="Pilih icon kategori"><option value="">Pilih icon...</option></select></div>
           <div><label>Urutan Tampil</label><input id="catSort" type="number" min="0" value="0"></div>
           <div class="full"><label>Deskripsi (opsional)</label><input id="catDescription"></div>
           <div><label><input type="checkbox" id="catActive" style="width:auto" checked> Aktif</label></div>

@@ -6,7 +6,6 @@ let supabase = null;
 
 export async function initSupabase() {
   if (supabase) return supabase;
-  // Supabase loaded via CDN in index.html
   if (typeof window.supabase === 'undefined') {
     throw new Error('Supabase SDK not loaded');
   }
@@ -76,7 +75,6 @@ async function openApp() {
   document.getElementById('appView').classList.add('active');
   document.getElementById('adminName').textContent = profile.full_name || user.email;
 
-  // Load initial data
   const { loadCategories, loadDashboard } = await import('./db.js');
   await loadCategories();
   await loadDashboard();

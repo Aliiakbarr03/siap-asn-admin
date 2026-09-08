@@ -26,10 +26,9 @@ export default defineConfig({
         assetFileNames: '[name]-[hash].[ext]'
       }
     },
-    // Chunk splitting strategy
     chunkSizeWarningLimit: 1000,
     target: 'esnext',
-    sourcemap: false // set to true untuk debug
+    sourcemap: false
   },
   server: {
     port: 5173,

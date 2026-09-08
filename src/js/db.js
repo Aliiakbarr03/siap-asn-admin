@@ -8,7 +8,6 @@ export async function loadCategories() {
   const { data } = await sb.from('categories').select('*').order('sort_order');
   categories = data || [];
 
-  // Populate dropdowns
   ['qCategory', 'mCategory'].forEach(id => {
     const sel = document.getElementById(id);
     if (sel) {

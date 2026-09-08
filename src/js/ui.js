@@ -1,18 +1,15 @@
 // UI utilities
 
 export function showPage(id, btn) {
-  // Hide all pages
   document.querySelectorAll('.page').forEach(page => {
     page.classList.remove('active');
   });
 
-  // Show target page
   const targetPage = document.getElementById(id);
   if (targetPage) {
     targetPage.classList.add('active');
   }
 
-  // Update nav button active state
   document.querySelectorAll('.navbtn').forEach(navbtn => {
     navbtn.classList.remove('active');
   });

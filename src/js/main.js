@@ -1,6 +1,6 @@
 // Main app initialization
 import { initAuth, handleLogin, handleLogout } from './auth.js';
-import { loadCategories, addCategory, addQuestion, addMaterial } from './db.js';
+import { loadCategories, addCategory, addQuestion, addMaterial, createTryout } from './db.js';
 import { showPage, slugify } from './ui.js';
 
 // Global functions for HTML onclick handlers
@@ -11,6 +11,7 @@ window.slugify = slugify;
 window.addCategory = addCategory;
 window.addQuestion = addQuestion;
 window.addMaterial = addMaterial;
+window.createTryout = createTryout;
 
 // Initialize on load
 window.addEventListener('DOMContentLoaded', async () => {
