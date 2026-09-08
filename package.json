@@ -1,0 +1,25 @@
+{
+  "name": "siap-asn-admin",
+  "version": "1.0.0",
+  "description": "SIAP ASN Admin Panel dengan Vite Build Setup",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "optimize:images": "imagemin src/assets/images --out-dir=dist/images"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "lucide": "^latest",
+    "xlsx": "^0.20.3"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-basic-ssl": "^1.0.0",
+    "terser": "^5.24.0",
+    "cssnano": "^6.0.0",
+    "postcss": "^8.4.0",
+    "postcss-cssnext": "^3.10.0"
+  }
+}
